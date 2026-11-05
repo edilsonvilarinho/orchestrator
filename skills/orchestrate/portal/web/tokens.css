@@ -1,0 +1,55 @@
+/*
+ * Portal theme tokens (colour, type, scene). Light in :root, dark via prefers-color-scheme.
+ *
+ * Tema: claro em :root; escuro via prefers-color-scheme (quando não há data-theme="light")
+ * e via :root[data-theme="dark"] (escolha explícita do usuário).
+ * .force-light / .force-dark forçam um tema num subtrecho (ex.: documentação, previews).
+ *
+ * Tokens --sc-* alimentam a cena Three.js (lidos com getComputedStyle). Não usar em componentes de UI.
+ * Fontes (Google Fonts):
+ *   https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Stencil+Display:wght@600;800&display=swap
+ */
+:root, .force-light {
+  --bg: #e4dfd3; --surface: #efebe2; --fg: #1b1915; --muted: #625d52; --line: #c7c0b1;
+  --paper: #fbf8f0; --paper-2: #f4efe2; --ink: #1b1915; --ink-muted: #6e685c; --rule: #d6cfbf;
+  --stamp: #b3121d; --carbon: #23428a; --redact: #141310; --manila: #dcc58e; --manila-ink: #4a3d1c;
+  --shadow: rgba(60, 48, 30, .22); --shadow-soft: rgba(60, 48, 30, .12);
+  --signal: #b3121d; /* red on --bg/--surface: focus ring, wordmark, REC dot */
+  --clip: #8b8f96; /* steel paper clip; same in both themes, so not redefined below */
+  --shade: #12110f; /* face shading of isometric volumes; always dark, same in both themes, so not redefined below */
+  --stamp-read: #3d382e; /* LIDO stamp: reader state, not document state */
+  --sheet-edge: transparent; /* sheet border; only the dark paper needs one */
+  --stamp-blend: multiply; --fibre-blend: multiply; --fibre-op: .06; /* multiply erases ink on dark paper: dark theme overrides */
+  --r: 10px; --r-sm: calc(var(--r) * .6); --r-xs: calc(var(--r) * .35); /* radius of sheets, controls and small marks */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --sc-bg: #d9d4c8; --sc-fog: #d9d4c8; --sc-floor: #cdc6b6; --sc-shelf: #b3ab9b; --sc-mono: #12110f; --sc-edge: #12110f;
+  --sc-beam: #ffffff; --sc-paper: #f7f3ea; --sc-bezel: #2a2823; --sc-amb: 1.05; --sc-spot: 0.6;
+  --display: 'Special Elite', 'Courier New', monospace;
+  --body: 'Courier Prime', 'Courier New', monospace;
+  --stencil: 'Big Shoulders Stencil Display', Impact, sans-serif;
+  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif; /* running text: summaries, descriptions */
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --surface: #0a0a0a; --fg: #f0ead9; --muted: #9c9686; --line: #232320;
+    --paper: #0d0d0c; --paper-2: #131312; --ink: #f0ead9; --ink-muted: #aaa393; --rule: #2d2c28;
+    --stamp: #ff5c5c; --signal: #ff5c5c; --carbon: #a4b9f2; --redact: #f0ead9; --manila: #b49a5e; --manila-ink: #120d03;
+    --shadow: rgba(0, 0, 0, 0); --shadow-soft: rgba(0, 0, 0, 0);
+    --stamp-read: #f0ead9; --sheet-edge: #3a3934; --stamp-blend: normal; --fibre-blend: screen; --fibre-op: .03;
+    --sc-bg: #0d0c0b; --sc-fog: #0d0c0b; --sc-floor: #171613; --sc-shelf: #4d4940; --sc-mono: #0b0b0a; --sc-edge: #8a8374;
+    --sc-beam: #f0e3c4; --sc-paper: #d8d0bd; --sc-bezel: #1c1b18; --sc-amb: 0.32; --sc-spot: 2.4;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"], .force-dark {
+  --bg: #000000; --surface: #0a0a0a; --fg: #f0ead9; --muted: #9c9686; --line: #232320;
+  --paper: #0d0d0c; --paper-2: #131312; --ink: #f0ead9; --ink-muted: #aaa393; --rule: #2d2c28;
+  --stamp: #ff5c5c; --signal: #ff5c5c; --carbon: #a4b9f2; --redact: #f0ead9; --manila: #b49a5e; --manila-ink: #120d03;
+  --shadow: rgba(0, 0, 0, 0); --shadow-soft: rgba(0, 0, 0, 0);
+  --stamp-read: #f0ead9; --sheet-edge: #3a3934; --stamp-blend: normal; --fibre-blend: screen; --fibre-op: .03;
+  --sc-bg: #0d0c0b; --sc-fog: #0d0c0b; --sc-floor: #171613; --sc-shelf: #4d4940; --sc-mono: #0b0b0a; --sc-edge: #8a8374;
+  --sc-beam: #f0e3c4; --sc-paper: #d8d0bd; --sc-bezel: #1c1b18; --sc-amb: 0.32; --sc-spot: 2.4;
+  color-scheme: dark;
+}
+.force-light, .force-dark { background: var(--bg); color: var(--fg); }
