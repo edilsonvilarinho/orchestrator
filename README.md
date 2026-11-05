@@ -1,66 +1,66 @@
 # orchestrate
 
-**Uma skill do [Claude Code](https://claude.com/claude-code) que executa um pedido por um fluxo multiagente "barato primeiro", com um portal de "escritório" ao vivo mostrando o que cada agente está fazendo.**
+**A [Claude Code](https://claude.com/claude-code) skill that runs a request through a cheap-first multi-agent workflow, with a live "office" portal that shows what every agent is doing.**
 
-🇺🇸 [Read in English](README.en.md)
+🇧🇷 [Leia em português](README.pt-BR.md)
 
-![Demonstração do portal](docs/media/portal-demo.gif)
+![Portal demo](docs/media/portal-demo.gif)
 
-> O GIF acima é o portal reproduzindo seus **dados de exemplo** embutidos (marcados como `DADOS DE EXEMPLO` na interface). Nada ali vem de uma sessão real.
+> The GIF above is the portal playing its built-in **example data** (labelled `DADOS DE EXEMPLO` in the UI). Nothing in it comes from a real session.
 
-## O que faz
+## What it does
 
-`/orchestrate <pedido>` transforma a sessão principal do Claude Code em orquestradora, seguindo regras fixas:
+`/orchestrate <request>` turns the main Claude Code session into an orchestrator that follows a fixed set of rules:
 
-1. **Planejar primeiro.** O pedido vira tarefas com ID, dono, caminhos exclusivos e critério de aceite verificável (de preferência um comando que sai 0).
-2. **Haiku primeiro.** Subagentes rodam em `haiku`. Sonnet só entra após **10 entregas reprovadas** da mesma tarefa, e a orquestradora para após **mais 3** reprovações no sonnet.
-3. **Prompts curtos.** O prompt de delegação tem no máximo 12 linhas e aponta para um arquivo de briefing em vez de colar contexto.
-4. **Relato não é prova.** A orquestradora confere cada critério com evidência própria (diff, execução, captura de tela) antes de aceitar.
-5. **Erro volta para o mesmo agente**, que ainda tem o contexto, em vez de abrir outro.
-6. **Trabalho visual passa pelo portão de protótipos.** São gerados N protótipos e você escolhe um antes da versão final.
+1. **Plan first.** The request is split into tasks with an ID, an owner, exclusive file paths and a verifiable acceptance criterion (ideally a command that exits 0).
+2. **Haiku first.** Subagents run on `haiku`. Sonnet is used only after **10 rejected deliveries** of the same task, and the orchestrator stops after **3 more** rejections on sonnet.
+3. **Short prompts.** A delegation prompt is at most 12 lines and points to a briefing file instead of pasting context.
+4. **A report is not proof.** The orchestrator checks every criterion with its own evidence (diff, execution, screenshot) before accepting.
+5. **Errors go back to the same agent**, which still holds the context, instead of spawning a new one.
+6. **Visual work passes a prototype gate.** N prototypes are produced and the user picks one before the final version.
 
 ```mermaid
 flowchart LR
-    U([Você]) -->|/orchestrate pedido| O[Orquestradora<br/>sessão principal]
-    O -->|plano + tarefas| P[(Portal<br/>127.0.0.1:4599)]
-    O -->|prompt curto + briefing| A1[explorer]
+    U([You]) -->|/orchestrate request| O[Orchestrator<br/>main session]
+    O -->|plan + tasks| P[(Portal<br/>127.0.0.1:4599)]
+    O -->|short prompt + briefing| A1[explorer]
     O --> A2[backend-dev / frontend-dev]
     O --> A3[prototype-dev]
     O --> A4[test-runner]
-    A1 & A2 & A3 & A4 -->|retorno| O
-    O -->|veredito: aprovada| D([Pronto])
-    O -->|veredito: devolvida, mesmo agente| A2
-    O -.->|10.ª reprovação| S[sonnet high]
+    A1 & A2 & A3 & A4 -->|return| O
+    O -->|verdict: approved| D([Done])
+    O -->|verdict: rejected, same agent| A2
+    O -.->|10th rejection| S[sonnet high]
     A2 & A3 -.->|transcripts| P
 ```
 
-## O portal
+## The portal
 
-A cada disparo a skill sobe um pequeno servidor local (Node, sem dependências, só em `127.0.0.1`) e imprime a URL na primeira linha da resposta. Numa única tela ele mostra:
+On every invocation the skill starts a small local server (Node, no dependencies, bound to `127.0.0.1` only) and prints its URL as the first line of the reply. It shows, on a single screen:
 
-- uma **mesa por agente**, com estado, atividade atual e uso de tokens;
-- um **quadro de tarefas** (fila, andamento, validação, devolvida, aprovada);
-- um **registro de comunicação** (delegações, retornos, vereditos, devoluções).
+- one **desk per agent**, with state, current activity and token usage;
+- a **task board** (queue, in progress, validation, returned, approved);
+- a **communication log** (delegations, returns, verdicts, returns to the agent).
 
-Ele lê os transcripts de sessão do Claude Code sozinho. O que só a orquestradora sabe (tarefas, falas, vereditos) entra por `emit.mjs`.
+It reads the Claude Code session transcripts on its own. What only the orchestrator knows (tasks, messages, verdicts) is pushed through `emit.mjs`.
 
-| Claro | Escuro | Celular |
+| Light | Dark | Mobile |
 |---|---|---|
-| ![Claro](docs/media/portal-light.png) | ![Escuro](docs/media/portal-dark.png) | <img src="docs/media/portal-mobile.png" width="220" alt="Celular"> |
+| ![Light](docs/media/portal-light.png) | ![Dark](docs/media/portal-dark.png) | <img src="docs/media/portal-mobile.png" width="220" alt="Mobile"> |
 
-> **Idioma.** A interface do portal, os subcomandos e flags do `emit.mjs` (`tarefa`, `fala`, `veredito`, `escalada`, `--titulo`, `--dono`, …) e os nomes de estado das tarefas são em **português**. O `SKILL.md` está em inglês e a documentação existe em português (`README.md`) e inglês (`README.en.md`); o `SKILL.md` informa ao modelo os comandos exatos em português. Interface traduzida ainda não existe.
+> **Language note.** The portal UI, the `emit.mjs` subcommands and flags (`tarefa`, `fala`, `veredito`, `escalada`, `--titulo`, `--dono`, …) and the task state names are in **Portuguese**. The skill instructions (`SKILL.md`) and this documentation are in English; `SKILL.md` tells the model the exact Portuguese commands to use. A translated UI is not done yet.
 
-## Requisitos
+## Requirements
 
-- Claude Code com suporte a skills e subagentes.
-- Node.js 24 (versão em que o código foi desenvolvido e testado; versões anteriores não foram verificadas).
-- Testado apenas no Windows 11. Nada no código é específico do Windows, mas macOS e Linux não foram verificados.
+- Claude Code with skills and subagents support.
+- Node.js 24 (the version the code was developed and tested on; older versions are not verified).
+- Tested on Windows 11 only. Nothing in the code is Windows-specific, but macOS and Linux are unverified.
 
-## Instalação
+## Install
 
-A skill é a pasta `skills/orchestrate/`. Escolha um local.
+The skill is the folder `skills/orchestrate/`. Pick one location.
 
-**Pessoal (todos os projetos):**
+**Personal (all projects):**
 
 ```bash
 git clone https://github.com/edilsonvilarinho/orchestrator.git
@@ -76,106 +76,106 @@ New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
 Copy-Item -Recurse skills\orchestrate "$HOME\.claude\skills\orchestrate"
 ```
 
-**Só um projeto:** copie para `<projeto>/.claude/skills/orchestrate/`.
+**One project only:** copy to `<project>/.claude/skills/orchestrate/`.
 
-Reinicie o Claude Code (ou abra uma sessão nova) para ele carregar a skill. Confirme que `/orchestrate` aparece na lista de comandos.
+Restart Claude Code (or start a new session) so it picks up the skill. Check that `/orchestrate` appears in the slash-command list.
 
-### Agentes (configurados por projeto na primeira execução)
+### Agents (configured per project on first run)
 
-Na primeira `/orchestrate` em um projeto, a skill detecta que os agentes ainda não foram configurados (nenhum dos cinco em `<projeto>/.claude/agents/` e nenhuma escolha registrada) e, antes de planejar:
+On the first `/orchestrate` in a project, the skill detects that the agents are not configured yet (none of the five in `<project>/.claude/agents/` and no recorded choice) and, before planning:
 
-1. lê só os manifestos do projeto (`package.json`, `pom.xml`, `build.gradle*`, `go.mod`, `Cargo.toml`, `pyproject.toml`, `*.csproj`/`*.sln`) e mostra a stack e os comandos de teste/build encontrados;
-2. pergunta se você quer **instalar os agentes para este projeto** ou **usar os genéricos**;
-3. ao instalar, grava `explorer`, `test-runner`, `backend-dev`, `frontend-dev` e `prototype-dev` em `<projeto>/.claude/agents/` (a partir de `skills/orchestrate/agents/`, já com `model: haiku` e `effort: high`), cada um com uma seção `Project context` com stack, comandos e arquivos de regras (`CLAUDE.md`, `AGENTS.md`). Agente que já existe não é sobrescrito.
+1. reads only the project manifests (`package.json`, `pom.xml`, `build.gradle*`, `go.mod`, `Cargo.toml`, `pyproject.toml`, `*.csproj`/`*.sln`) and shows the stack and test/build commands it found;
+2. asks whether to **install the agents for this project** or **use the generic ones**;
+3. on install, writes `explorer`, `test-runner`, `backend-dev`, `frontend-dev` and `prototype-dev` to `<project>/.claude/agents/` (from `skills/orchestrate/agents/`, already `model: haiku` and `effort: high`), each with a `Project context` section holding stack, commands and rule files (`CLAUDE.md`, `AGENTS.md`). An existing agent is never overwritten.
 
-Comandos vindos dos scripts do `package.json` são tratados como declarados; os demais (ex.: `mvn test`) são o padrão do ecossistema e vêm marcados como **convenção, não verificada**. Nada é inferido além dos manifestos.
+Commands from `package.json` scripts are treated as declared; the rest (e.g. `mvn test`) are the ecosystem default and are marked **convention, not verified**. Nothing is inferred beyond the manifests.
 
-Se os agentes novos não aparecerem para delegação, reinicie a sessão (ou use `/agents`) e repita o pedido. Para refazer: apague `<projeto>/.claude/escritorio/agentes.json` ou rode `node <skill>/setup/agentes.mjs instalar --sobrescrever`.
+If the new agents do not show up for delegation, restart the session (or use `/agents`) and repeat the request. To redo it: delete `<project>/.claude/escritorio/agentes.json` or run `node <skill>/setup/agentes.mjs instalar --sobrescrever`.
 
-A orquestradora é a própria sessão principal; não precisa de arquivo de agente.
+The orchestrator itself is your main session; it needs no agent file.
 
-## Uso
+## Use
 
-Numa sessão do Claude Code, dentro do projeto em que quer trabalhar:
+In a Claude Code session, inside the project you want to work on:
 
 ```text
-/orchestrate adicionar rate limiting à API pública e cobrir com testes
-/orchestrate --prototypes 3 redesenhar a tela de configurações
-/orchestrate --no-portal adicionar rate limiting na API pública
-/orchestrate --design-system ./design-system redesenhar a tela de configurações
+/orchestrate add rate limiting to the public API and cover it with tests
+/orchestrate --prototypes 3 redesign the settings screen
+/orchestrate --no-portal add rate limiting to the public API
+/orchestrate --design-system ./design-system redesign the settings screen
 ```
 
-Opções da chamada:
+Call options:
 
-| Opção | Efeito |
+| Option | Effect |
 |---|---|
-| `--prototypes N` | Número de protótipos por entrega visual (padrão 4). |
-| `--design-system <caminho>` | Local do design system do projeto; o `explorer` o pesquisa e as tarefas visuais o usam. Veja abaixo. |
-| `--no-portal` | Roda sem o portal, com o mesmo controle de fluxo. Veja abaixo. |
+| `--prototypes N` | Number of prototypes per visual deliverable (default 4). |
+| `--design-system <path>` | Location of the project's design system; the `explorer` researches it and visual tasks use it. See below. |
+| `--no-portal` | Runs without the portal, with the same flow control. See below. |
 
-O que acontece:
+What happens:
 
-1. A primeira linha da resposta é a URL do portal (padrão `http://127.0.0.1:4599/`). O navegador abre uma vez.
-2. A orquestradora planeja, registra cada tarefa no portal e delega com prompts curtos.
-3. Você acompanha mesas, quadro e registro ao vivo. O trabalho dos agentes é lido dos transcripts.
-4. Cada entrega é verificada. A reprovada volta ao mesmo agente; a 10.ª reprovação no haiku escala para sonnet.
-5. Em trabalho visual, ela para após gerar `--prototypes N` protótipos (padrão 4) em `prototipos/<entrega>/` e espera sua escolha. A galeria é servida pelo portal em `/prototipos/<entrega>/`.
-6. O relatório final diz o que foi verificado, o que não foi, o custo em tokens por agente e as reprovações por tarefa.
+1. The first line of the reply is the portal URL (default `http://127.0.0.1:4599/`). The browser opens once.
+2. The orchestrator plans, registers each task in the portal and delegates with short prompts.
+3. You follow desks, board and log live. Agents' own work is read from the transcripts.
+4. Each delivery is verified. A rejected one goes back to the same agent; the 10th rejection on haiku escalates to sonnet.
+5. For visual work, it stops after generating `--prototypes N` prototypes (default 4) under `prototipos/<deliverable>/` and waits for your choice. The gallery is served by the portal at `/prototipos/<deliverable>/`.
+6. The final report states what was verified, what was not, token cost per agent and rejections per task.
 
-### Design system do projeto (`--design-system <caminho>`)
+### Project design system (`--design-system <path>`)
 
-Aponte o arquivo ou a pasta do design system do seu projeto: `/orchestrate --design-system ./design-system <pedido>`. Antes de planejar qualquer entrega visual, a orquestradora delega ao `explorer` (haiku, somente leitura) a busca de tokens (cores, tipografia, espaçamento), componentes com regras de uso e guias escritos. O retorno (ponteiros `arquivo:linha`, no máximo 20 linhas) vira um briefing, e cada tarefa visual aponta para ele e para os arquivos do design system. Os protótipos usam só tokens e componentes existentes; precisar de algo novo exige sua permissão. Só caminho local é aceito (URL ou link do Figma não). Se o caminho não existir ou nada utilizável for encontrado, a skill para e avisa em vez de inventar. Sem a opção, em trabalho visual ela procura um design system no próprio projeto.
+Point at your project's design system file or folder: `/orchestrate --design-system ./design-system <request>`. Before planning any visual deliverable, the orchestrator delegates to the `explorer` (haiku, read-only) a search for tokens (colors, type, spacing), components with usage rules and written guidelines. The return (`file:line` pointers, at most 20 lines) becomes a briefing, and every visual task points to it and to the design-system files. Prototypes use existing tokens and components only; anything new needs your permission. Only a local path is accepted (not a URL or a Figma link). If the path does not exist or nothing usable is found, the skill stops and tells you instead of inventing one. Without the option, on visual work it looks for a design system inside the project.
 
-### Modo sem portal (`--no-portal`)
+### Without the portal (`--no-portal`)
 
-Passe `--no-portal` na chamada para rodar sem o portal: nenhum servidor sobe, nenhum navegador abre, nenhuma URL é impressa. O controle de fluxo é o mesmo: plano com tarefas e critérios verificáveis, haiku primeiro, validação com evidência própria, devolução ao mesmo agente, escalada para sonnet só na 10ª reprovação e parada na 3ª no sonnet. As chamadas `emit.mjs` continuam sendo feitas, porque o log em `.claude/escritorio/<sessao>.jsonl` é o que conta as reprovações; o `emit.mjs` recebe `--sessao` e não depende do servidor.
+Pass `--no-portal` in the call to run without the portal: no server starts, no browser opens, no URL is printed. The flow control is the same: a plan with tasks and verifiable criteria, haiku first, validation with the orchestrator's own evidence, returns to the same agent, escalation to sonnet only on the 10th rejection and a stop on the 3rd on sonnet. The `emit.mjs` calls still run, because the log in `.claude/escritorio/<session>.jsonl` is what counts rejections; `emit.mjs` takes `--sessao` and does not depend on the server.
 
-O que muda: não há visualização ao vivo; a galeria de protótipos é aberta direto dos arquivos `prototipos/<entrega>/index.html` (a skill informa os caminhos); e o relatório final informa que o custo de tokens por agente não foi medido, já que ele vem do portal.
+What changes: there is no live view; the prototype gallery is opened straight from the `prototipos/<deliverable>/index.html` files (the skill gives you the paths); and the final report says the per-agent token cost was not measured, since it comes from the portal.
 
-### Comandos que a orquestradora usa
+### Commands the orchestrator uses
 
-Normalmente você nunca digita estes; são o que o `SKILL.md` manda o modelo executar.
+You normally never type these; they are what `SKILL.md` instructs the model to run.
 
 ```bash
-# registrar / atualizar tarefa
-node <skill>/portal/emit.mjs tarefa --id T1 --titulo "Título" --dono backend-dev --estado fila
-# falar no registro
-node <skill>/portal/emit.mjs fala --de am --para backend-dev --tarefa T1 --texto "A tarefa é sua."
-# veredito: aprovada | devolvida (imprime a contagem de reprovações e a próxima ação)
-node <skill>/portal/emit.mjs veredito --tarefa T1 --resultado devolvida --texto "O teste X falha."
-# escalar após a 10.ª reprovação no haiku
+# register / update a task
+node <skill>/portal/emit.mjs tarefa --id T1 --titulo "Title" --dono backend-dev --estado fila
+# say something in the log
+node <skill>/portal/emit.mjs fala --de am --para backend-dev --tarefa T1 --texto "Task is yours."
+# verdict: aprovada | devolvida (prints the rejection count and the next action)
+node <skill>/portal/emit.mjs veredito --tarefa T1 --resultado devolvida --texto "Test X fails."
+# escalate after the 10th rejection on haiku
 node <skill>/portal/emit.mjs escalada --tarefa T1
 ```
 
-### Opções do portal
+### Portal options
 
 ```bash
-node <skill>/portal/start.mjs --sessao <id-da-sessao> [--porta 4599] [--abrir nao]   # idempotente
-node <skill>/portal/server.mjs --replay <id-da-sessao> --velocidade 20               # reproduz sessão antiga
+node <skill>/portal/start.mjs --sessao <session-id> [--porta 4599] [--abrir nao]   # idempotent
+node <skill>/portal/server.mjs --replay <session-id> --velocidade 20               # replay an old session
 ```
 
-| Variável | Significado |
+| Variable | Meaning |
 |---|---|
-| `PORTAL_RAIZ` | Raiz do projeto observado. Cai para `CLAUDE_PROJECT_DIR` e depois para o diretório atual. |
-| `PORTAL_PROJETOS` | Diretório dos transcripts do Claude Code. Padrão `~/.claude/projects`. |
+| `PORTAL_RAIZ` | Project root to observe. Falls back to `CLAUDE_PROJECT_DIR`, then the current directory. |
+| `PORTAL_PROJETOS` | Directory with Claude Code transcripts. Default `~/.claude/projects`. |
 
-O portal grava seu estado em `<projeto>/.claude/escritorio/` (`portal.json` e um `<sessao>.jsonl` com os eventos da orquestradora). Coloque essa pasta no `.gitignore`.
+The portal writes its state under `<project>/.claude/escritorio/` (`portal.json` and one `<session>.jsonl` of orchestrator events). Add that folder to `.gitignore`.
 
-Contrato completo de dados (fontes, API HTTP, SSE, formatos de estado): [`skills/orchestrate/references/portal-contract.md`](skills/orchestrate/references/portal-contract.md).
+Full data contract (sources, HTTP API, SSE, state shapes): [`skills/orchestrate/references/portal-contract.md`](skills/orchestrate/references/portal-contract.md) (in Portuguese).
 
-## Limites e ressalvas
+## Limits and caveats
 
-- O formato de transcript do Claude Code **não é API pública**. O coletor ignora linhas desconhecidas, mas uma mudança de formato pode degradar o portal.
-- Os limites de reprovação (10 no haiku, 3 no sonnet) são constantes em `portal/emit.mjs` (`LIMITE_REPROVACOES`). A contagem vem do log da sessão, não da memória do modelo.
-- Os tipos de agente conhecidos pelo portal estão fixos em `portal/collector.mjs` (`TIPOS_AGENTE`); os demais aparecem como genéricos.
-- A skill reduz o *custo de orquestração* por desenho (haiku como padrão, prompts curtos); não garante uma economia específica. Meça nas suas sessões com os totais de tokens por agente que o portal mostra.
+- The Claude Code transcript format is **not a public API**. The collector ignores unknown lines, but a format change can degrade the portal.
+- Rejection limits (10 on haiku, 3 on sonnet) are constants in `portal/emit.mjs` (`LIMITE_REPROVACOES`). The counting comes from the session log, not from the model's memory.
+- Agent types known to the portal are fixed in `portal/collector.mjs` (`TIPOS_AGENTE`); others are drawn as generic.
+- The skill reduces the *orchestration overhead* by design (haiku default, short prompts); it does not guarantee a specific saving. Measure on your own sessions with the per-agent token totals the portal shows.
 
-## Testes
+## Tests
 
 ```bash
-npm test        # node --test "skills/orchestrate/**/*.test.mjs"  (41 testes, sem dependências)
+npm test        # node --test "skills/orchestrate/**/*.test.mjs"  (41 tests, no dependencies)
 ```
 
-## Licença
+## License
 
 [MIT](LICENSE).
