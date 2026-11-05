@@ -1,6 +1,6 @@
 # orchestrate
 
-**A [Claude Code](https://claude.com/claude-code) skill that runs a request through a cheap-first multi-agent workflow, with a live "office" portal that shows what every agent is doing.**
+**A [Claude Code](https://claude.com/claude-code) skill that runs a request through a cheap-first multi-agent workflow, with a live isometric "circuit" portal that shows what every agent is doing.**
 
 🇧🇷 [Leia em português](README.pt-BR.md)
 
@@ -38,9 +38,11 @@ flowchart LR
 
 On every invocation the skill starts a small local server (Node, no dependencies, bound to `127.0.0.1` only) and prints its URL as the first line of the reply. It shows, on a single screen:
 
-- one **desk per agent**, with state, current activity and token usage;
+- an isometric **circuit map**: the orchestrator is the hub and each agent type is a station on a branch, with state, run count, active task and a packet running along the branch for every new message. Several runs of the same type share one station;
 - a **task board** (queue, in progress, validation, returned, approved);
 - a **communication log** (delegations, returns, verdicts, returns to the agent).
+
+Click a station to open its runs, tokens, prompt, steps and final return. Light and dark themes follow the system or the theme button. No external fonts or CDN: it works offline.
 
 It reads the Claude Code session transcripts on its own. What only the orchestrator knows (tasks, messages, verdicts) is pushed through `emit.mjs`.
 
@@ -49,6 +51,8 @@ It reads the Claude Code session transcripts on its own. What only the orchestra
 | ![Light](docs/media/portal-light.png) | ![Dark](docs/media/portal-dark.png) | <img src="docs/media/portal-mobile.png" width="220" alt="Mobile"> |
 
 > **Language note.** The portal UI, the `emit.mjs` subcommands and flags (`tarefa`, `fala`, `veredito`, `escalada`, `--titulo`, `--dono`, …) and the task state names are in **Portuguese**. The skill instructions (`SKILL.md`) and this documentation are in English; `SKILL.md` tells the model the exact Portuguese commands to use. A translated UI is not done yet.
+
+The visual rules (tokens, isometric geometry, the no-overlap check) are in [`skills/orchestrate/references/portal-system-design.md`](skills/orchestrate/references/portal-system-design.md) (in Portuguese).
 
 ## Requirements
 
@@ -117,7 +121,7 @@ What happens:
 
 1. The first line of the reply is the portal URL (default `http://127.0.0.1:4599/`). The browser opens once.
 2. The orchestrator plans, registers each task in the portal and delegates with short prompts.
-3. You follow desks, board and log live. Agents' own work is read from the transcripts.
+3. You follow the circuit, board and log live. Agents' own work is read from the transcripts.
 4. Each delivery is verified. A rejected one goes back to the same agent; the 10th rejection on haiku escalates to sonnet.
 5. For visual work, it stops after generating `--prototypes N` prototypes (default 4) under `prototipos/<deliverable>/` and waits for your choice. The gallery is served by the portal at `/prototipos/<deliverable>/`.
 6. The final report states what was verified, what was not, token cost per agent and rejections per task.

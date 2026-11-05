@@ -70,10 +70,9 @@ function mostrarSelo(visivel) {
     const css = document.createElement('style');
     css.setAttribute('data-portal-kit', '');
     css.textContent = [
-      '.portal-selo{position:fixed;right:12px;bottom:12px;z-index:2147483000;padding:6px 12px;',
-      'font:700 14px/1 var(--stencil);letter-spacing:.14em;text-transform:uppercase;',
-      'color:var(--paper);background:var(--stamp);border:2px solid var(--paper);border-radius:var(--r-xs);',
-      'transform:rotate(-2deg);pointer-events:none;mix-blend-mode:normal}',
+      '.portal-selo{position:fixed;right:12px;bottom:12px;z-index:2147483000;padding:5px 10px;',
+      'font:600 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;',
+      'color:var(--bg);background:var(--fg);border-radius:6px;pointer-events:none}',
     ].join('');
     document.head.appendChild(css);
   }
