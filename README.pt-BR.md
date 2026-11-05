@@ -1,6 +1,6 @@
 # orchestrate
 
-**Uma skill do [Claude Code](https://claude.com/claude-code) que executa um pedido por um fluxo multiagente "barato primeiro", com um portal de "escritório" ao vivo mostrando o que cada agente está fazendo.**
+**Uma skill do [Claude Code](https://claude.com/claude-code) que executa um pedido por um fluxo multiagente "barato primeiro", com um portal isométrico em "circuito" ao vivo mostrando o que cada agente está fazendo.**
 
 🇺🇸 [Read in English](README.md)
 
@@ -38,9 +38,11 @@ flowchart LR
 
 A cada disparo a skill sobe um pequeno servidor local (Node, sem dependências, só em `127.0.0.1`) e imprime a URL na primeira linha da resposta. Numa única tela ele mostra:
 
-- uma **mesa por agente**, com estado, atividade atual e uso de tokens;
+- um **mapa em circuito** isométrico: a orquestradora é o hub e cada tipo de agente é uma estação num ramal, com estado, número de execuções, tarefa ativa e um pacote correndo pelo ramal a cada mensagem nova. Várias execuções do mesmo tipo dividem uma estação;
 - um **quadro de tarefas** (fila, andamento, validação, devolvida, aprovada);
 - um **registro de comunicação** (delegações, retornos, vereditos, devoluções).
+
+Clique numa estação para abrir as execuções, os tokens, o prompt, os passos e o retorno final. Os temas claro e escuro seguem o sistema ou o botão de tema. Sem fontes externas nem CDN: funciona offline.
 
 Ele lê os transcripts de sessão do Claude Code sozinho. O que só a orquestradora sabe (tarefas, falas, vereditos) entra por `emit.mjs`.
 
@@ -49,6 +51,8 @@ Ele lê os transcripts de sessão do Claude Code sozinho. O que só a orquestrad
 | ![Claro](docs/media/portal-light.png) | ![Escuro](docs/media/portal-dark.png) | <img src="docs/media/portal-mobile.png" width="220" alt="Celular"> |
 
 > **Idioma.** A interface do portal, os subcomandos e flags do `emit.mjs` (`tarefa`, `fala`, `veredito`, `escalada`, `--titulo`, `--dono`, …) e os nomes de estado das tarefas são em **português**. O `SKILL.md` está em inglês e a documentação existe em português (`README.pt-BR.md`) e inglês (`README.md`); o `SKILL.md` informa ao modelo os comandos exatos em português. Interface traduzida ainda não existe.
+
+As regras visuais (tokens, geometria isométrica, verificação de não sobreposição) estão em [`skills/orchestrate/references/portal-system-design.md`](skills/orchestrate/references/portal-system-design.md).
 
 ## Requisitos
 
@@ -117,7 +121,7 @@ O que acontece:
 
 1. A primeira linha da resposta é a URL do portal (padrão `http://127.0.0.1:4599/`). O navegador abre uma vez.
 2. A orquestradora planeja, registra cada tarefa no portal e delega com prompts curtos.
-3. Você acompanha mesas, quadro e registro ao vivo. O trabalho dos agentes é lido dos transcripts.
+3. Você acompanha o circuito, o quadro e o registro ao vivo. O trabalho dos agentes é lido dos transcripts.
 4. Cada entrega é verificada. A reprovada volta ao mesmo agente; a 10.ª reprovação no haiku escala para sonnet.
 5. Em trabalho visual, ela para após gerar `--prototypes N` protótipos (padrão 4) em `prototipos/<entrega>/` e espera sua escolha. A galeria é servida pelo portal em `/prototipos/<entrega>/`.
 6. O relatório final diz o que foi verificado, o que não foi, o custo em tokens por agente e as reprovações por tarefa.

@@ -5,461 +5,162 @@
 <link rel="icon" href="data:,">
 <meta name="darkreader-lock">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>PE7 · Escritório isométrico dos agentes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Stencil+Display:wght@600;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<title>Portal · orchestrate</title>
 <link rel="stylesheet" href="/portal/tokens.css">
 <style>
-/* PE2 · Isométrico em tela única, revisão PE6: uma mesa por agente. Cores só por token; faces dos volumes por color-mix com --shade. */
-:root{--p2-gut:max(14px,env(safe-area-inset-left),env(safe-area-inset-right))}
-/* Cena: valores do tema claro. O tema escuro sobe piso, paredes e contornos pelos tokens --sc-* (só a cena muda). */
-:root{
-  --p2-scene-bg:var(--surface);
-  --p2-floor:var(--paper-2);--p2-floor-edge:var(--line);--p2-grid:var(--rule);
-  --p2-wall-r:color-mix(in srgb,var(--paper) 86%,var(--shade));
-  --p2-wall-l:color-mix(in srgb,var(--paper) 74%,var(--shade));
-  --p2-wall-edge:var(--line);
-  --p2-edge:var(--ink);--p2-edge-op:.45;--p2-obj-edge:var(--ink-muted);
-  --p2-mono-t:color-mix(in srgb,var(--shade) 80%,var(--clip));--p2-mono-l:color-mix(in srgb,var(--shade) 92%,var(--clip));--p2-mono-r:var(--shade);
-  --p2-chair:color-mix(in srgb,var(--ink-muted) 80%,var(--shade));--p2-chair-edge:var(--ink);--p2-chair-op:.4;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --p2-scene-bg:var(--sc-bg);
-    --p2-floor:color-mix(in srgb,var(--sc-floor) 60%,var(--sc-shelf));--p2-floor-edge:var(--sc-edge);--p2-grid:color-mix(in srgb,var(--sc-floor) 35%,var(--sc-shelf));
-    --p2-wall-r:color-mix(in srgb,var(--sc-floor) 33%,var(--sc-shelf));
-    --p2-wall-l:color-mix(in srgb,var(--sc-floor) 45%,var(--sc-shelf));
-    --p2-wall-edge:var(--sc-edge);
-    --p2-edge:var(--sc-edge);--p2-edge-op:1;--p2-obj-edge:var(--sc-edge);
-    --p2-mono-t:color-mix(in srgb,var(--sc-mono) 55%,var(--sc-edge));--p2-mono-l:color-mix(in srgb,var(--sc-mono) 88%,var(--sc-edge));--p2-mono-r:var(--sc-mono);
-    --p2-chair:color-mix(in srgb,var(--sc-shelf) 55%,var(--sc-mono));--p2-chair-edge:var(--sc-edge);--p2-chair-op:1;
-  }
-}
-:root[data-theme="dark"]{
-  --p2-scene-bg:var(--sc-bg);
-  --p2-floor:color-mix(in srgb,var(--sc-floor) 60%,var(--sc-shelf));--p2-floor-edge:var(--sc-edge);--p2-grid:color-mix(in srgb,var(--sc-floor) 35%,var(--sc-shelf));
-  --p2-wall-r:color-mix(in srgb,var(--sc-floor) 33%,var(--sc-shelf));
-  --p2-wall-l:color-mix(in srgb,var(--sc-floor) 45%,var(--sc-shelf));
-  --p2-wall-edge:var(--sc-edge);
-  --p2-edge:var(--sc-edge);--p2-edge-op:1;--p2-obj-edge:var(--sc-edge);
-  --p2-mono-t:color-mix(in srgb,var(--sc-mono) 55%,var(--sc-edge));--p2-mono-l:color-mix(in srgb,var(--sc-mono) 88%,var(--sc-edge));--p2-mono-r:var(--sc-mono);
-  --p2-chair:color-mix(in srgb,var(--sc-shelf) 55%,var(--sc-mono));--p2-chair-edge:var(--sc-edge);--p2-chair-op:1;
-}
-
-*,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:15px;line-height:1.5;min-width:0;overflow-x:hidden}
+/* Circuito. System design: references/portal-system-design.md. Cores só por token; faces dos volumes por color-mix. */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
 button,select{font:inherit;color:inherit}
-:focus-visible{outline:2px dashed var(--signal);outline-offset:2px}
-.p2-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.p2-tid{font:700 1em/inherit var(--body)}
-
-/* ---------- cabeçalho: uma linha ---------- */
-.p2-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:8px var(--p2-gut);border-bottom:2px solid var(--manila);background:var(--bg);min-width:0}
-.p2-brand{margin:0;flex:none;font:600 clamp(17px,1.5vw,26px)/1 var(--stencil);letter-spacing:.1em;text-transform:uppercase;color:var(--signal);white-space:nowrap}
-.p2-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0;font:400 12px/1.2 var(--body);letter-spacing:.02em;text-transform:uppercase;color:var(--muted)}
-.p2-chip{display:inline-block;padding:3px 8px;border:1px solid var(--line);border-radius:var(--r-xs);background:var(--surface);color:var(--fg);font:400 12px/1.2 var(--body);letter-spacing:.06em;text-transform:uppercase}
-.p2-chip[data-modo="replay"]{border-color:var(--carbon);color:var(--carbon)}
-.p2-btn{padding:6px 12px;background:var(--surface);color:var(--fg);border:2px solid var(--fg);border-radius:var(--r-sm);font:400 13px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;box-shadow:3px 3px 0 var(--stamp);transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
-.p2-btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--stamp)}
-.p2-btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--stamp)}
-.p2-head .p2-btn{flex:none}
-
-/* totais no cabeçalho */
-.p2-totals{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin:0 0 0 auto;padding:0;min-width:0}
-.p2-total{display:flex;align-items:baseline;gap:5px;padding:3px 7px;background:var(--paper);border:1px solid var(--sheet-edge);border-left:4px solid var(--manila);border-radius:var(--r-xs);white-space:nowrap}
-.p2-total dt{font:400 11px/1 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted)}
-.p2-total dd{margin:0;font:400 14px/1.1 var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
-.p2-total--ativos dd{color:var(--carbon)}
-
-/* ---------- layout ---------- */
-.p2-main{display:grid;gap:14px;padding:14px var(--p2-gut) 40px;grid-template-columns:minmax(0,1fr)}
-.p2-main>*{min-width:0}
-.p2-side{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0}
-.p2-side>*{min-width:0}
-.p2-h2{margin:0 0 8px;font:600 18px/1.1 var(--stencil);letter-spacing:.1em;text-transform:uppercase;color:var(--fg)}
-.p2-h2 span{font:400 13px/1 var(--body);letter-spacing:.02em;text-transform:none;color:var(--muted);margin-left:8px}
-
-/* ---------- cena ---------- */
-.p2-stage{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
-.p2-scenewrap{position:relative;height:min(45svh,520px);background:var(--p2-scene-bg);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.p2-scene{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:hidden}
-.p2-world *{vector-effect:non-scaling-stroke}
-.p2-world .p2-fly,.p2-world .p2-fly *,.p2-world .p2-trail{vector-effect:none}
-
-.p2-floor{fill:var(--p2-floor);stroke:var(--p2-floor-edge);stroke-width:2}
-.p2-gridline{stroke:var(--p2-grid);stroke-width:1;fill:none}
-.p2-wall-r{fill:var(--p2-wall-r);stroke:var(--p2-wall-edge);stroke-width:2}
-.p2-wall-l{fill:var(--p2-wall-l);stroke:var(--p2-wall-edge);stroke-width:2}
-.p2-skirt{fill:color-mix(in srgb,var(--manila) 70%,var(--shade))}
-.p2-window{fill:color-mix(in srgb,var(--carbon) 16%,var(--paper));stroke:var(--p2-obj-edge);stroke-width:2}
-.p2-windowbar{stroke:var(--p2-obj-edge);stroke-width:2}
-.p2-drawer{fill:color-mix(in srgb,var(--manila) 55%,var(--paper));stroke:var(--p2-obj-edge);stroke-width:1.5}
-.p2-clock{fill:var(--paper);stroke:var(--ink);stroke-width:2.5}
-.p2-clockhand{stroke:var(--ink);stroke-width:2.5;stroke-linecap:round}
-.p2-rug{fill:color-mix(in srgb,var(--stamp) 14%,var(--paper-2));stroke:var(--stamp);stroke-width:2;stroke-dasharray:10 7}
-
-/* tons das caixas */
-.p2-box polygon{stroke:var(--p2-edge);stroke-opacity:var(--p2-edge-op);stroke-width:1.2;stroke-linejoin:round}
-.p2-f-t{fill:var(--top)}.p2-f-l{fill:var(--lft)}.p2-f-r{fill:var(--rgt)}
-.p2-t-wood{--top:var(--manila);--lft:color-mix(in srgb,var(--manila) 78%,var(--shade));--rgt:color-mix(in srgb,var(--manila) 58%,var(--shade))}
-.p2-t-paper{--top:var(--paper);--lft:color-mix(in srgb,var(--paper) 84%,var(--shade));--rgt:color-mix(in srgb,var(--paper) 66%,var(--shade))}
-.p2-t-steel{--top:var(--clip);--lft:color-mix(in srgb,var(--clip) 80%,var(--shade));--rgt:color-mix(in srgb,var(--clip) 60%,var(--shade))}
-.p2-t-ink{--top:var(--ink-muted);--lft:color-mix(in srgb,var(--ink-muted) 78%,var(--shade));--rgt:color-mix(in srgb,var(--ink-muted) 58%,var(--shade))}
-.p2-t-stamp{--top:var(--stamp);--lft:color-mix(in srgb,var(--stamp) 78%,var(--shade));--rgt:color-mix(in srgb,var(--stamp) 58%,var(--shade))}
-.p2-t-carbon{--top:var(--carbon);--lft:color-mix(in srgb,var(--carbon) 78%,var(--shade));--rgt:color-mix(in srgb,var(--carbon) 58%,var(--shade))}
-.p2-t-mono{--top:var(--p2-mono-t);--lft:var(--p2-mono-l);--rgt:var(--p2-mono-r)}
-
-/* mesas */
-.p2-seat{cursor:pointer}
-.p2-shadow{fill:var(--shade);fill-opacity:.2}
-.p2-chair{fill:var(--p2-chair);stroke:var(--p2-chair-edge);stroke-opacity:var(--p2-chair-op);stroke-width:1.2}
-
-/* monólito: preto, com monograma e faixa de luz */
-.p2-mono-d{fill:var(--manila);font:600 28px var(--stencil);letter-spacing:.06em;text-anchor:middle;dominant-baseline:central}
-.p2-band{fill:var(--ink-muted);fill-opacity:.45}
-.p2-bandglow{fill:var(--signal);fill-opacity:0}
-.p2-seat[data-estado="trabalhando"] .p2-band,.p2-seat[data-estado="aguardando"] .p2-band,.p2-seat[data-estado="erro"] .p2-band{fill:var(--signal);fill-opacity:1}
-.p2-seat[data-estado="trabalhando"] .p2-bandglow,.p2-seat[data-estado="aguardando"] .p2-bandglow,.p2-seat[data-estado="erro"] .p2-bandglow{fill-opacity:.32}
-.p2-seat[data-estado="aguardando"] .p2-band{fill-opacity:.7}
-
-/* luminária de estado: acesa quando o posto está ativo */
-.p2-bulb{fill:var(--paper);stroke:var(--ink);stroke-opacity:.5}
-.p2-halo{fill:var(--manila);fill-opacity:.5;stroke:none;display:none}
-.p2-seat[data-estado="trabalhando"] .p2-halo,.p2-seat[data-estado="aguardando"] .p2-halo,.p2-seat[data-estado="erro"] .p2-halo{display:inline}
-.p2-seat[data-estado="trabalhando"] .p2-bulb,.p2-seat[data-estado="aguardando"] .p2-bulb{fill:var(--manila)}
-.p2-seat[data-estado="erro"] .p2-bulb{fill:var(--stamp)}
-.p2-seat[data-estado="erro"] .p2-halo{fill:var(--stamp);fill-opacity:.35}
-
-/* pastas abertas: uma por execução ativa, até quatro */
-.p2-pasta.is-off{display:none}
-.p2-pasta-sheet{fill:var(--paper)}
-
-/* marcador de estado: forma + cor; o texto vai no rótulo */
-.p2-marker-plate{fill:var(--paper);stroke:currentColor;stroke-width:3}
-.p2-marker{color:var(--ink-muted)}
-.p2-seat[data-estado="trabalhando"] .p2-marker{color:var(--carbon)}
-.p2-seat[data-estado="aguardando"] .p2-marker{color:var(--ink)}
-.p2-seat[data-estado="concluido"] .p2-marker{color:var(--ink)}
-.p2-seat[data-estado="erro"] .p2-marker{color:var(--stamp)}
-.p2-ring{fill:none;stroke:var(--stamp);stroke-width:4;stroke-dasharray:8 6;opacity:0;pointer-events:none}
-.p2-ring.is-recebe{opacity:1}
-.p2-slam{display:none}
-.p2-seat.is-devolvido .p2-slam,.p2-seat.has-devolucao .p2-slam,.p2-seat.p2-measure .p2-slam{display:inline}
-.p2-slam rect{fill:var(--paper);fill-opacity:.9;stroke:var(--stamp);stroke-width:4;rx:5}
-.p2-slam text{fill:var(--stamp);font:400 22px var(--display);letter-spacing:.1em;text-anchor:middle;dominant-baseline:central}
-.p2-main[data-modo="compacto"] .p2-slam{display:none!important}
-.p2-prop-ring{fill:none;stroke:var(--ink);stroke-width:2.5}
-.p2-prop-line{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round}
-.p2-prop-shade{fill:var(--manila);stroke:var(--ink);stroke-opacity:.5;stroke-width:1.2}
-.p2-prop-bulb{fill:var(--paper);stroke:var(--ink);stroke-opacity:.5}
-
-/* ---------- rótulos de mesa: camada HTML em pixels fixos, posicionada sem tocar nas mesas ---------- */
-.p2-labels{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.p2-leaders{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.p2-leaders line{stroke:var(--ink-muted);stroke-width:1.5;stroke-dasharray:3 3}
-.p2-lbl{display:flex;flex-direction:column;width:100%;text-align:left;padding:4px 8px;background:var(--paper);color:var(--ink);border:1px solid var(--ink-muted);border-left:6px solid var(--ink-muted);border-radius:var(--r-xs);cursor:pointer;box-shadow:0 2px 0 var(--shadow),0 4px 10px var(--shadow-soft);min-width:0;overflow:hidden;font:400 14px/1.2 var(--body)}
-.p2-lbl[data-estado="trabalhando"]{border-left-color:var(--carbon)}
-.p2-lbl[data-estado="erro"]{border-left-color:var(--stamp);border-color:var(--stamp)}
-.p2-lbl[data-estado="aguardando"]{border-left-style:double;border-left-width:7px;border-left-color:var(--ink)}
-.p2-lbl[data-estado="concluido"]{border-left-style:dashed;border-left-color:var(--ink-muted)}
-.p2-lbl--cena{position:absolute;pointer-events:auto}
-.p2-lbl--cena[hidden]{display:none}
-.p2-lbl>*{flex:none}
-.p2-lbl [hidden]{display:none!important}
-.p2-lbl__hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0}
-.p2-lbl__nome{flex:none;font:400 15px/1.2 var(--display);color:var(--ink);white-space:nowrap}
-.p2-lbl__mod{min-width:0;font:400 14px/1.2 var(--body);color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p2-st{display:flex;align-items:center;gap:6px;font:400 14px/1.2 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink);min-width:0}
-.p2-st svg{flex:none;width:15px;height:15px}
-.p2-st[data-estado="trabalhando"]{color:var(--carbon)}
-.p2-st[data-estado="erro"]{color:var(--stamp)}
-.p2-st[data-estado="ocioso"],.p2-st[data-estado="concluido"]{color:var(--ink-muted)}
-.p2-lbl__cnt{display:block;font:400 14px/1.2 var(--body);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p2-lbl__ativ{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font:400 14px/1.2 var(--body);color:var(--ink);overflow-wrap:anywhere;min-height:2.4em}
-.p2-lbl__tar{display:block;font:400 14px/1.2 var(--body);color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p2-tk{display:block;margin-top:3px;font:400 13px/1.3 var(--body);color:var(--ink-muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-
-/* voo de objetos */
-.p2-fly{pointer-events:none}
-.p2-fly__pasta{fill:var(--manila);stroke:var(--ink);stroke-opacity:.7;stroke-width:1.6;stroke-linejoin:round}
-.p2-fly__linha{fill:none;stroke:var(--manila-ink);stroke-width:1.6;stroke-linecap:round}
-.p2-fly__memo{fill:var(--paper);stroke:var(--ink);stroke-opacity:.7;stroke-width:1.6}
-.p2-fly__clip{fill:none;stroke:var(--clip);stroke-width:3;stroke-linecap:round}
-.p2-fly__dev{fill:var(--stamp);stroke:var(--ink);stroke-opacity:.8;stroke-width:2;stroke-linejoin:round}
-.p2-fly__devtag{fill:var(--paper);stroke:var(--ink);stroke-opacity:.8;stroke-width:1.5}
-.p2-fly__devtxt{fill:var(--stamp);font:400 11px var(--display);letter-spacing:.06em;text-anchor:middle;dominant-baseline:central}
-.p2-fly__sealA{fill:var(--paper);stroke:var(--carbon);stroke-width:3}
-.p2-fly__sealB{fill:var(--carbon)}
-.p2-fly__env{fill:var(--paper);stroke:var(--ink);stroke-opacity:.7;stroke-width:1.6;stroke-linejoin:round}
-.p2-trail{fill:none;stroke:var(--stamp);stroke-width:calc(4px * var(--p2-inv,1));stroke-dasharray:14 10;stroke-linecap:round;opacity:.9}
-
-/* balão: HTML em pixels fixos */
-.p2-balloons{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:4}
-.p2-balloon{position:absolute;width:260px}
-.p2-balloon__in{padding:7px 10px;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:var(--r-sm);box-shadow:3px 3px 0 var(--ink-muted)}
-.p2-balloon[data-tipo="devolucao"] .p2-balloon__in{border-color:var(--stamp);border-width:4px;box-shadow:5px 5px 0 var(--stamp)}
-.p2-balloon[data-tipo="retorno"] .p2-balloon__in{border-style:dashed}
-.p2-balloon[data-tipo="veredito"] .p2-balloon__in{border-style:double;border-width:5px;border-color:var(--carbon)}
-.p2-balloon__h{display:block;font:400 14px/1.2 var(--body);color:var(--stamp)}
-.p2-balloon__t{display:-webkit-box;-webkit-line-clamp:5;line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;margin:3px 0 0;font:400 14px/1.3 var(--serif);overflow-wrap:anywhere}
-
-/* faixa de devolução, impossível de perder */
-.p2-devo{position:absolute;left:50%;top:12px;z-index:5;max-width:calc(100% - 28px);transform:translateX(-50%) rotate(-2deg);padding:6px 14px 8px;background:var(--paper);color:var(--stamp);border:5px solid var(--stamp);border-radius:var(--r-xs);box-shadow:6px 6px 0 var(--stamp);text-align:center;pointer-events:none}
-.p2-devo[hidden]{display:none}
-.p2-devo__t{display:block;font:400 clamp(22px,3vw,34px)/1 var(--display);letter-spacing:.14em;text-transform:uppercase;mix-blend-mode:var(--stamp-blend)}
-.p2-devo__d{display:block;margin-top:4px;font:400 13px/1.3 var(--body);color:var(--ink);overflow-wrap:anywhere}
-
-/* lista de postos (cena compacta) */
-.p2-rosterwrap{display:none}
-.p2-main[data-modo="compacto"] .p2-rosterwrap{display:block}
-.p2-roster{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
-.p2-roster .p2-lbl{position:static;height:auto;overflow:visible;padding:4px 9px}
-.p2-roster .p2-lbl__nome{white-space:normal}
-.p2-roster .p2-lbl__tar{white-space:normal}
-.p2-roster .p2-lbl__ativ{-webkit-line-clamp:3;line-clamp:3}
-
-/* fita de telex: a última fala, numa linha */
-.p2-telex{display:none;position:relative;margin:0;padding:9px 14px;list-style:none;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-sm);font:400 13px/1.3 var(--body);color:var(--ink);min-width:0}
-.p2-telex::before,.p2-telex::after{content:"";position:absolute;left:0;right:0;height:6px;background:radial-gradient(circle,var(--bg) 1.8px,var(--paper-2) 2.4px) 0 0/12px 6px repeat-x}
-.p2-telex::before{top:1px}.p2-telex::after{bottom:1px}
-.p2-telex li{display:flex;gap:8px;min-width:0}
-.p2-telex li>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.p2-telex time{flex:none;color:var(--stamp);font-variant-numeric:tabular-nums}
-.p2-telex__vazio{color:var(--ink-muted)}
-.p2-telex li.is-novo{background:var(--rule)}
-.p2-telex li[data-tipo="devolucao"]{color:var(--stamp)}
-
-/* ---------- quadro de tarefas ---------- */
-.p2-boardwrap{display:flex;flex-direction:column;min-height:0}
-.p2-board{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));min-height:0}
-.p2-col{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface);border:1px solid var(--line);border-bottom:3px solid var(--manila);border-radius:var(--r-sm)}
-.p2-col__hd{display:flex;justify-content:space-between;align-items:center;gap:4px;margin:0 0 6px;padding:5px 7px;background:var(--manila);color:var(--manila-ink);border-radius:var(--r-sm) var(--r-sm) 0 0;font:600 14px/1.1 var(--stencil);letter-spacing:.06em;text-transform:uppercase}
-.p2-col[data-col="devolvida"] .p2-col__hd{background:var(--stamp);color:var(--paper)}
-.p2-col__n{font:400 13px/1 var(--body)}
-.p2-cards{list-style:none;margin:0;padding:0 5px 6px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;min-height:0}
-.p2-card{padding:5px 7px;background:var(--paper);color:var(--ink);border:1px solid var(--sheet-edge);border-left:4px solid var(--manila);border-radius:var(--r-xs);box-shadow:0 1px 0 var(--shadow),0 3px 8px var(--shadow-soft);min-width:0;overflow-wrap:anywhere}
-.p2-card__top{display:flex;justify-content:space-between;align-items:center;gap:4px}
-.p2-card__id{font:700 13px/1 var(--body);letter-spacing:.02em;color:var(--stamp);white-space:nowrap}
-.p2-card__t{margin:2px 0 0;font:400 13px/1.25 var(--serif);display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.p2-card__o{margin:3px 0 0;font:400 12px/1.25 var(--body);color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p2-card__dev{display:inline-block;padding:0 4px;border:2px solid var(--ink-muted);border-radius:var(--r-xs);font:400 12px/1.3 var(--body);color:var(--ink-muted);white-space:nowrap}
-.p2-card__dev[data-n="0"]{border-style:dashed}
-.p2-card__dev:not([data-n="0"]){border-color:var(--stamp);color:var(--stamp)}
-.p2-empty{margin:0;padding:4px 8px;font:italic 400 12.5px/1.3 var(--serif);color:var(--muted)}
-.p2-aprov{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-bottom:3px solid var(--manila);border-radius:var(--r-sm)}
-.p2-aprov>summary{cursor:pointer;padding:5px 9px;font:600 14px/1.2 var(--stencil);letter-spacing:.08em;text-transform:uppercase;color:var(--fg);list-style:none;display:flex;align-items:center;gap:8px}
-.p2-aprov>summary::-webkit-details-marker{display:none}
-.p2-aprov>summary::before{content:"+";display:inline-block;width:16px;height:16px;line-height:14px;text-align:center;border:2px solid var(--ink-muted);border-radius:var(--r-xs);font:400 14px/12px var(--body)}
-.p2-aprov[open]>summary::before{content:"\2212"}
-.p2-aprov .p2-cards{padding:0 6px 6px;max-height:min(30svh,260px);overflow:auto;overscroll-behavior:contain}
-
-/* ---------- registro ---------- */
-.p2-logwrap{display:flex;flex-direction:column;min-height:0}
-.p2-logtools{display:flex;flex-wrap:nowrap;gap:8px;align-items:center;margin:0 0 6px}
-.p2-logtools label{font:400 13px/1 var(--body);color:var(--muted)}
-.p2-select{flex:1 1 140px;min-width:0;padding:4px 6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);font:400 13px/1.2 var(--body)}
-.p2-loglist{list-style:none;margin:0;padding:6px;max-height:60svh;overflow:auto;overflow-anchor:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;overscroll-behavior:contain;min-height:0}
-.p2-loglist li[hidden]{display:none}
-.p2-log{padding:4px 8px 5px;background:var(--paper);color:var(--ink);border:1px solid var(--sheet-edge);border-left:6px solid var(--manila);border-radius:var(--r-xs);min-width:0}
-.p2-log[data-tipo="devolucao"]{border-left-color:var(--stamp);border:3px solid var(--stamp);background:var(--paper-2)}
-.p2-log[data-tipo="retorno"]{border-left-style:dashed}
-.p2-log[data-tipo="veredito"]{border-left-style:double;border-left-width:8px;border-left-color:var(--carbon)}
-.p2-log__top{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center;font:400 13px/1.3 var(--body);color:var(--ink-muted)}
-.p2-log__top time{color:var(--stamp);font-variant-numeric:tabular-nums}
-.p2-tag{padding:0 5px;border:2px solid var(--ink);border-radius:var(--r-xs);font:400 13px/1.3 var(--body);color:var(--ink)}
-.p2-log[data-tipo="devolucao"] .p2-tag{background:var(--stamp);border-color:var(--stamp);color:var(--paper)}
-.p2-log[data-tipo="retorno"] .p2-tag{border-style:dashed}
-.p2-log[data-tipo="veredito"] .p2-tag{border-color:var(--carbon);color:var(--carbon);border-style:double}
-.p2-log[data-tipo="fala"] .p2-tag,.p2-log[data-tipo="atividade"] .p2-tag{border-style:dotted}
-.p2-log__quem{min-width:0;font:400 13px/1.3 var(--body);color:var(--ink);overflow-wrap:anywhere}
-.p2-log__txt{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%;margin:2px 0 0;padding:0;background:none;border:0;border-radius:var(--r-xs);text-align:left;color:var(--ink);font:400 13px/1.3 var(--serif);overflow-wrap:anywhere;cursor:pointer}
-.p2-log__txt[aria-expanded="true"]{display:block;overflow:visible}
-.p2-log__txt:hover{background:var(--paper-2)}
-.p2-log__rever{flex:none;margin-left:auto;padding:0 6px;background:var(--surface);border:1px dashed var(--ink-muted);border-radius:var(--r-xs);font:400 13px/1.35 var(--body);cursor:pointer;color:var(--ink)}
-
-/* ---------- painel do posto ---------- */
-.p2-dlg{width:min(780px,calc(100vw - 24px));max-height:min(88vh,900px);padding:0;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:var(--r);box-shadow:8px 8px 0 var(--stamp);overflow:auto;overscroll-behavior:contain}
-.p2-dlg::backdrop{background:color-mix(in srgb,var(--bg) 72%,var(--shade))}
-.p2-dlg__hd{position:sticky;top:0;z-index:2;display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 16px;background:var(--manila);color:var(--manila-ink);border-bottom:2px solid var(--ink)}
-.p2-dlg__tt{margin:0;font:600 24px/1.1 var(--stencil);letter-spacing:.08em;text-transform:uppercase;overflow-wrap:anywhere;min-width:0}
-.p2-dlg__sub{display:block;margin-top:4px;font:400 13px/1.3 var(--body)}
-.p2-dlg__body{padding:14px 16px 20px;display:grid;gap:16px}
-.p2-dlg h3{margin:0 0 6px;font:600 16px/1.1 var(--stencil);letter-spacing:.1em;text-transform:uppercase;color:var(--stamp)}
-.p2-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 14px;margin:0}
-.p2-kv div{min-width:0;padding:6px 8px;border:1px dashed var(--rule);border-radius:var(--r-xs)}
-.p2-kv dt{font:400 12px/1.1 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-muted)}
-.p2-kv dd{margin:2px 0 0;font:400 14px/1.3 var(--body);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.p2-pre{margin:0;padding:10px 12px;max-height:260px;overflow:auto;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-xs);font:400 13px/1.45 var(--body);white-space:pre-wrap;overflow-wrap:anywhere}
-.p2-steps{list-style:none;margin:0;padding:0;display:grid;gap:5px;max-height:320px;overflow:auto;border:1px solid var(--rule);border-radius:var(--r-xs);padding:6px}
-.p2-step{display:flex;flex-wrap:wrap;gap:3px 8px;padding:4px 6px;border-left:4px solid var(--rule);font:400 13px/1.35 var(--body);min-width:0}
-.p2-step[data-erro="true"]{border-left-color:var(--stamp);border-left-width:6px;background:var(--paper-2)}
-.p2-step time{color:var(--stamp);font-variant-numeric:tabular-nums}
-.p2-step__k{font:400 13px/1.4 var(--body);text-transform:uppercase;color:var(--ink-muted)}
-.p2-step__e{padding:0 5px;border:2px solid var(--stamp);border-radius:var(--r-xs);font:400 12px/1.4 var(--body);color:var(--stamp)}
-.p2-step__r{flex:1 1 100%;min-width:0;overflow-wrap:anywhere}
-.p2-tools{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
-.p2-tools li{padding:2px 8px;border:1px solid var(--ink-muted);border-radius:var(--r-xs);font:400 13px/1.4 var(--body)}
-.p2-note{margin:0;font:italic 400 14px/1.4 var(--serif);color:var(--ink-muted)}
-.p2-execs{list-style:none;margin:0;padding:6px;display:grid;gap:6px;max-height:min(42vh,340px);overflow:auto;border:1px solid var(--rule);border-radius:var(--r-xs);overscroll-behavior:contain}
-.p2-exec{display:grid;gap:2px;width:100%;text-align:left;padding:6px 10px;background:var(--paper-2);color:var(--ink);border:1px solid var(--ink-muted);border-left:6px solid var(--ink-muted);border-radius:var(--r-xs);cursor:pointer;font:400 14px/1.3 var(--body);min-width:0}
-.p2-exec:hover{background:var(--surface)}
-.p2-exec[data-estado="trabalhando"]{border-left-color:var(--carbon)}
-.p2-exec[data-estado="erro"]{border-left-color:var(--stamp)}
-.p2-exec[data-estado="aguardando"]{border-left-style:double;border-left-width:7px;border-left-color:var(--ink)}
-.p2-exec[data-estado="concluido"]{border-left-style:dashed}
-.p2-exec__d{overflow-wrap:anywhere}
-.p2-exec__m{color:var(--ink-muted);font-size:13px;overflow-wrap:anywhere}
-
-/* selo de dados de exemplo (cópia local, usada só quando o kit não carrega por file://) */
-.p2-selo{position:fixed;right:12px;bottom:12px;z-index:2147483000;padding:6px 12px;font:600 14px/1 var(--stencil);letter-spacing:.14em;text-transform:uppercase;color:var(--paper);background:var(--stamp);border:2px solid var(--paper);border-radius:var(--r-xs);transform:rotate(-2deg);pointer-events:none}
-
-/* ---------- tela única a partir de 1100 px ---------- */
-@media (min-width:1100px){
-  html,body{height:100%;overflow:hidden}
-  body{display:grid;grid-template-rows:auto minmax(0,1fr);height:100dvh}
-  .p2-head{flex-wrap:nowrap}
-  .p2-meta{flex:none;flex-wrap:nowrap;white-space:nowrap}
-  .p2-totals{flex-wrap:nowrap;flex:none}
-  .p2-main{min-height:0;padding:12px var(--p2-gut);gap:12px;grid-template-columns:minmax(0,1fr) clamp(380px,36vw,520px);grid-template-rows:minmax(0,1fr)}
-  .p2-stage{min-height:0}
-  .p2-scenewrap{flex:1 1 0;height:auto;min-height:0}
-  .p2-telex{display:block;flex:none}
-  .p2-side{display:grid;grid-template-rows:minmax(0,60fr) minmax(0,40fr);gap:12px;min-height:0}
-  .p2-side>*{min-height:0}
-  .p2-board{flex:1 1 0;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
-  .p2-board:has(.p2-col[data-col="bloqueada"]){grid-template-columns:repeat(5,minmax(0,1fr))}
-  .p2-col{overflow:hidden}
-  .p2-cards{overflow:auto;flex:1 1 0;overscroll-behavior:contain}
-  .p2-aprov .p2-cards{max-height:min(24svh,200px)}
-  .p2-loglist{flex:1 1 0;max-height:none}
-}
-@media (min-width:1100px) and (max-width:1899.98px){
-  .p2-meta .p2-meta__at{display:none}
-}
-@media (min-width:1100px) and (max-width:1599.98px){
-  .p2-meta .p2-meta__ses{display:none}
-  .p2-total__w{display:none}
-}
-@media (min-width:1100px) and (max-width:1259.98px){
-  .p2-total--cache{display:none}
-}
-@media (min-width:1100px) and (max-width:1179.98px){
-  .p2-meta{display:none}
-}
-@media (min-width:1100px) and (max-width:1339.98px){
-  .p2-total dt{font-size:10px}
-  .p2-head{gap:6px 10px}
-  .p2-btn{padding:6px 9px}
-}
-
-/* ---------- movimento ---------- */
-@media (prefers-reduced-motion:no-preference){
-  .p2-seat[data-estado="trabalhando"] .p2-marker-plate{animation:p2-pulse 1.4s ease-in-out infinite alternate}
-  .p2-seat[data-estado="trabalhando"] .p2-halo,.p2-seat[data-estado="erro"] .p2-halo{animation:p2-glow 1.2s ease-in-out infinite alternate}
-  .p2-seat[data-estado="trabalhando"] .p2-bandglow{animation:p2-glow 1.2s ease-in-out infinite alternate}
-  .p2-seat.is-devolvido .p2-slam{animation:p2-slam .45s var(--ease) both}
-  .p2-ring.is-recebe{animation:p2-ring .8s ease-in-out infinite alternate}
-  .p2-devo:not([hidden]){animation:p2-slam-devo .45s var(--ease) both}
-  .p2-telex li.is-novo{animation:p2-fade .8s var(--ease) both}
-}
-@keyframes p2-glow{from{opacity:.55}to{opacity:1}}
-@keyframes p2-pulse{from{stroke-width:3}to{stroke-width:6}}
-@keyframes p2-ring{from{stroke-width:3}to{stroke-width:7}}
-@keyframes p2-slam{0%{transform:scale(2.3);opacity:.1}70%{transform:scale(.94);opacity:1}100%{transform:scale(1);opacity:1}}
-@keyframes p2-slam-devo{0%{transform:translateX(-50%) rotate(-2deg) scale(1.8);opacity:.15}70%{transform:translateX(-50%) rotate(-2deg) scale(.96);opacity:1}100%{transform:translateX(-50%) rotate(-2deg) scale(1);opacity:1}}
-@keyframes p2-fade{from{opacity:.3}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
-}
-
-@media (min-width:641px){
-  .p2-log__top{flex-wrap:nowrap}
-  .p2-log__top>*{flex:none}
-  .p2-log__top>.p2-log__quem{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-}
-@media (max-width:640px){
-  .p2-head{gap:6px 10px}
-  .p2-totals{margin-left:0}
-  .p2-board{grid-template-columns:minmax(0,1fr)}
-  .p2-devo{top:auto;bottom:8px;padding:4px 10px 5px;border-width:4px;box-shadow:4px 4px 0 var(--stamp)}
-  .p2-devo__t{font-size:20px}
-  .p2-devo__d{font-size:13px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .p2-dlg__body{padding:12px}
-}
+.pc-btn,.pc-select{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 11px;cursor:pointer}
+.pc-btn:hover,.pc-select:hover{border-color:var(--muted)}
+button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.pc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pc-head{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+.pc-brand{margin:0;font-size:15px;font-weight:650}
+.pc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;color:var(--muted);font-size:12px;font-family:var(--mono)}
+.pc-chip{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;border:1px solid var(--line)}
+.pc-chip[data-modo="ao-vivo"]{color:var(--c-concluido);border-color:currentColor}
+.pc-chip[data-modo="replay"]{color:var(--c-aguardando);border-color:currentColor}
+.pc-chip[data-modo="exemplo"]{border-style:dashed;color:var(--muted)}
+.pc-totals{display:flex;gap:18px;margin:0 0 0 auto;flex-wrap:wrap}
+.pc-total{display:flex;flex-direction:column}
+.pc-total dt{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pc-total dd{margin:0;font:600 14px var(--mono)}
+.pc-main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;padding:16px 20px;align-items:start}
+.pc-stage,.pc-card-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.pc-stage{padding:8px}
+.pc-scene{display:block;width:100%;height:auto;max-height:calc(100vh - 200px)}
+.pc-legenda{display:flex;gap:14px;flex-wrap:wrap;padding:6px 12px 8px;color:var(--muted);font-size:12px}
+.pc-legenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--fc)}
+.pc-side{display:grid;gap:16px;min-width:0}
+.pc-card-box{padding:14px 16px}
+.pc-h2{margin:0 0 10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;justify-content:space-between}
+.pc-h2 span{font-weight:400;letter-spacing:0;text-transform:none}
+/* quadro */
+.pc-board{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pc-col{min-width:0;background:var(--bg);border-radius:var(--r-sm);padding:8px}
+.pc-col__hd{margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;color:var(--fg)}
+.pc-col[data-col="fila"] .pc-col__hd{color:var(--c-fila)}.pc-col[data-col="andamento"] .pc-col__hd{color:var(--c-andamento)}
+.pc-col[data-col="validacao"] .pc-col__hd{color:var(--c-validacao)}.pc-col[data-col="devolvida"] .pc-col__hd{color:var(--c-devolvida)}.pc-col[data-col="bloqueada"] .pc-col__hd{color:var(--c-bloqueada)}
+.pc-col__n{font-family:var(--mono)}
+.pc-cards{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pc-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12px}
+.pc-card__top{display:flex;justify-content:space-between;font-family:var(--mono)}
+.pc-card__id{font-weight:600}.pc-card__dev{color:var(--muted)}.pc-card__dev[data-n="0"]{display:none}
+.pc-card__t,.pc-card__o{margin:2px 0 0}.pc-card__o{color:var(--muted)}
+.pc-empty{color:var(--muted);font-size:12px}
+.pc-aprov{margin-top:10px;font-size:13px}.pc-aprov summary{cursor:pointer;color:var(--c-aprovada)}.pc-aprov .pc-cards{margin-top:8px}
+/* registro */
+.pc-logtools{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:12px;color:var(--muted)}
+.pc-select{flex:1;min-width:0;padding:4px 8px}
+.pc-loglist{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:340px;overflow:auto}
+li.pc-log{font-size:13px;border-left:2px solid var(--line);padding-left:8px}
+li.pc-log[data-tipo="devolucao"]{border-color:var(--c-devolvida)}li.pc-log[data-tipo="veredito"]{border-color:var(--c-validacao)}li.pc-log[data-tipo="delegacao"]{border-color:var(--c-andamento)}li.pc-log[data-tipo="retorno"]{border-color:var(--c-aprovada)}
+li.pc-log[hidden]{display:none}
+.pc-log__top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.pc-log__top time,.pc-tid{font-family:var(--mono)}
+.pc-tag{font-weight:600;color:var(--fg)}.pc-log__quem{color:var(--fg)}.pc-tid{color:var(--accent)}
+.pc-log__rever{margin-left:auto;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;font-size:12px}
+.pc-log__txt{width:100%;text-align:left;background:none;border:0;padding:2px 0 0;cursor:pointer;color:var(--fg);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pc-log__txt[aria-expanded="true"]{-webkit-line-clamp:unset;display:block}
+/* diálogo */
+dialog.pc-dlg{width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 40px);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--fg);padding:0}
+dialog.pc-dlg::backdrop{background:rgba(0,0,0,.45)}
+.pc-dlg__hd{display:flex;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+.pc-dlg__tt{margin:0;font-size:16px}.pc-dlg__sub{color:var(--muted);font-size:12px}
+.pc-dlg__body{display:grid;gap:16px;padding:16px 18px}
+.pc-dlg__body h3{margin:0 0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pc-kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:0}
+.pc-kv div{background:var(--bg);border-radius:var(--r-sm);padding:6px 10px;min-width:0}
+.pc-kv dt{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pc-kv dd{margin:0;font-family:var(--mono);font-size:13px;overflow-wrap:anywhere}
+.pc-note{margin:0;color:var(--muted)}
+.pc-pre{margin:0;padding:10px 12px;background:var(--bg);border-radius:var(--r-sm);font:12px/1.5 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto}
+.pc-execs,.pc-steps,.pc-tools{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pc-tools{display:flex;flex-wrap:wrap}.pc-tools li{font:12px var(--mono);background:var(--bg);padding:3px 8px;border-radius:99px}
+.pc-exec{display:block;width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px;cursor:pointer}
+.pc-exec:hover{border-color:var(--muted)}.pc-exec__d{display:block;font-weight:600}.pc-exec__m{display:block;font:12px var(--mono);color:var(--muted)}
+.pc-step{display:flex;gap:8px;font:12px var(--mono);flex-wrap:wrap}.pc-step time,.pc-step__k{color:var(--muted)}
+.pc-step__e{color:var(--c-erro);font-weight:700}.pc-step[data-erro="true"] .pc-step__r{color:var(--c-erro)}
+.pc-selo{position:fixed;right:12px;bottom:12px;z-index:50;padding:5px 10px;font:600 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--bg);background:var(--fg);border-radius:6px;pointer-events:none}
+/* cena */
+.bx .t{fill:var(--fc,var(--plate))}
+.bx .l{fill:color-mix(in srgb,var(--fc,var(--plate)),#000 var(--sh-l))}
+.bx .r{fill:color-mix(in srgb,var(--fc,var(--plate)),#000 var(--sh-r))}
+.bx polygon{stroke:var(--edge);stroke-width:1;stroke-linejoin:round}
+.pl{--fc:var(--plate)}
+.a-ocioso{--fc:var(--c-ocioso)}.a-trabalhando{--fc:var(--c-trabalhando)}.a-aguardando{--fc:var(--c-aguardando)}.a-concluido{--fc:var(--c-concluido)}.a-erro{--fc:var(--c-erro)}
+.pc-o{cursor:pointer}
+.pc-o:hover .t{filter:brightness(1.07)}
+.pc-o:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.pc-o.sel .t{stroke:var(--accent);stroke-width:2.4}
+.lab{font:600 12.5px var(--sans);fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round;pointer-events:none}
+.sub{font:11px var(--mono);fill:var(--muted);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round;pointer-events:none}
+.pill{fill:var(--surface);stroke:var(--accent);stroke-width:2}
+.num{font:700 10.5px var(--mono);fill:var(--fg);pointer-events:none}
+.trk{fill:none;stroke:var(--plate-2);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+.cx{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:3 7;stroke-linecap:round;animation:fluxo 1.2s linear infinite}
+.pkt{fill:var(--accent)}
+.a-trabalhando .t{animation:pulso 1.8s ease-in-out infinite}
+@keyframes pulso{50%{filter:brightness(1.14)}}
+@keyframes fluxo{to{stroke-dashoffset:-20}}
+@media (prefers-reduced-motion:reduce){.a-trabalhando .t,.cx{animation:none}}
+@media (max-width:980px){.pc-main{grid-template-columns:minmax(0,1fr);padding:12px 14px}.pc-totals{margin-left:0;width:100%}.pc-head{padding:10px 14px}.pc-board{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
-  <symbol id="p2-g-trabalhando" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 7.5l7 4.5-7 4.5z" fill="currentColor"/></symbol>
-  <symbol id="p2-g-aguardando" viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M9 7h6l-3 5 3 5H9l3-5z" fill="currentColor"/></symbol>
-  <symbol id="p2-g-concluido" viewBox="0 0 24 24"><path d="M3 3h18v18H3z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M7 12.5l3.5 3.5L17 9" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-  <symbol id="p2-g-erro" viewBox="0 0 24 24"><path d="M12 2.5L22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 9v5.5M12 17v1.6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></symbol>
-  <symbol id="p2-g-ocioso" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 3"/><path d="M8 12h8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
-</defs></svg>
-
-<header class="p2-head">
-  <h1 class="p2-brand" id="p2-brand">Escritório dos agentes</h1>
-  <div class="p2-meta">
-    <span class="p2-chip" id="p2-modo" data-modo="conectando">conectando</span>
-    <span class="p2-meta__ses">sessão <span id="p2-sessao">—</span></span>
-    <span class="p2-meta__at">atualizado <time id="p2-atualizado">—</time></span>
+<header class="pc-head">
+  <h1 class="pc-brand" id="pc-brand">orchestrate · circuito dos agentes</h1>
+  <div class="pc-meta">
+    <span class="pc-chip" id="pc-modo" data-modo="conectando">conectando</span>
+    <span>sessão <span id="pc-sessao">—</span></span>
+    <span>atualizado <time id="pc-atualizado">—</time></span>
   </div>
-  <dl class="p2-totals" aria-label="Totais da sessão">
-    <div class="p2-total p2-total--ativos"><dt>Ativos</dt><dd id="p2-t-ativos">—</dd></div>
-    <div class="p2-total"><dt>Execuções</dt><dd id="p2-t-exec">—</dd></div>
-    <div class="p2-total"><dt><span class="p2-total__w">Tokens </span>entrada</dt><dd id="p2-t-ent">—</dd></div>
-    <div class="p2-total"><dt>saída</dt><dd id="p2-t-sai">—</dd></div>
-    <div class="p2-total p2-total--cache"><dt>cache</dt><dd id="p2-t-cac">—</dd></div>
+  <dl class="pc-totals" aria-label="Totais da sessão">
+    <div class="pc-total"><dt>Ativos</dt><dd id="pc-t-ativos">—</dd></div>
+    <div class="pc-total"><dt>Execuções</dt><dd id="pc-t-exec">—</dd></div>
+    <div class="pc-total"><dt>Entrada</dt><dd id="pc-t-ent">—</dd></div>
+    <div class="pc-total"><dt>Saída</dt><dd id="pc-t-sai">—</dd></div>
+    <div class="pc-total"><dt>Cache</dt><dd id="pc-t-cac">—</dd></div>
   </dl>
-  <button type="button" class="p2-btn" id="p2-tema" aria-label="Alternar tema: Sistema, Claro, Escuro">Tema: Sistema</button>
+  <button type="button" class="pc-btn" id="pc-tema" aria-label="Alternar tema: Sistema, Claro, Escuro">Tema: Sistema</button>
 </header>
 
-<main class="p2-main" id="p2-main" data-modo="normal">
-  <section class="p2-stage" id="p2-stage" aria-labelledby="p2-h-cena">
-    <h2 class="p2-sr" id="p2-h-cena">Escritório</h2>
-    <div class="p2-scenewrap" id="p2-scenewrap">
-      <svg class="p2-scene" id="p2-scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="group" aria-label="Escritório isométrico: cada agente tem a própria mesa"></svg>
-      <div class="p2-labels" id="p2-labels"></div>
-      <div class="p2-balloons" id="p2-balloons"></div>
-      <div class="p2-devo" id="p2-devo" hidden><span class="p2-devo__t">Devolução</span><span class="p2-devo__d" id="p2-devo-d"></span></div>
-    </div>
-    <ol class="p2-telex" id="p2-telex" aria-hidden="true"></ol>
+<main class="pc-main">
+  <section class="pc-stage" aria-labelledby="pc-h-cena">
+    <h2 class="pc-sr" id="pc-h-cena">Circuito dos agentes</h2>
+    <svg class="pc-scene" id="pc-scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" role="group" aria-label="Circuito: a orquestradora no centro e uma estação por tipo de agente"><g id="pc-fixa"></g><g id="pc-pacotes"></g></svg>
+    <div class="pc-legenda" id="pc-legenda"></div>
   </section>
 
-  <section class="p2-rosterwrap" aria-labelledby="p2-h-agentes">
-    <h2 class="p2-h2" id="p2-h-agentes">Agentes</h2>
-    <ul class="p2-roster" id="p2-roster"></ul>
-  </section>
-
-  <div class="p2-side">
-    <section class="p2-boardwrap" aria-labelledby="p2-h-quadro">
-      <h2 class="p2-h2" id="p2-h-quadro">Quadro de tarefas<span id="p2-n-tarefas"></span></h2>
-      <div class="p2-board" id="p2-board"></div>
-      <details class="p2-aprov" id="p2-aprov">
-        <summary id="p2-aprov-n">Aprovadas · 0</summary>
-        <ul class="p2-cards" id="p2-aprov-list"></ul>
+  <div class="pc-side">
+    <section class="pc-card-box" aria-labelledby="pc-h-quadro">
+      <h2 class="pc-h2" id="pc-h-quadro">Quadro de tarefas<span id="pc-n-tarefas"></span></h2>
+      <div class="pc-board" id="pc-board"></div>
+      <details class="pc-aprov" id="pc-aprov">
+        <summary id="pc-aprov-n">Aprovadas · 0</summary>
+        <ul class="pc-cards" id="pc-aprov-list"></ul>
       </details>
     </section>
-
-    <section class="p2-logwrap" aria-labelledby="p2-h-log">
-      <h2 class="p2-h2" id="p2-h-log">Registro de comunicação<span id="p2-n-falas"></span></h2>
-      <div class="p2-logtools">
-        <label for="p2-filtro">Filtrar</label>
-        <select class="p2-select" id="p2-filtro"><option value="">Todos os agentes</option></select>
+    <section class="pc-card-box" aria-labelledby="pc-h-log">
+      <h2 class="pc-h2" id="pc-h-log">Registro de comunicação<span id="pc-n-falas"></span></h2>
+      <div class="pc-logtools">
+        <label for="pc-filtro">Filtrar</label>
+        <select class="pc-select" id="pc-filtro"><option value="">Todos os agentes</option></select>
       </div>
-      <ol class="p2-loglist" id="p2-log" aria-live="polite" aria-relevant="additions" aria-label="Falas, da mais recente para a mais antiga"></ol>
+      <ol class="pc-loglist" id="pc-log" aria-live="polite" aria-relevant="additions" aria-label="Falas, da mais recente para a mais antiga"></ol>
     </section>
   </div>
 </main>
 
-<dialog class="p2-dlg" id="p2-dlg" aria-labelledby="p2-dlg-tt">
-  <div class="p2-dlg__hd">
-    <div><h2 class="p2-dlg__tt" id="p2-dlg-tt">Agente</h2><span class="p2-dlg__sub" id="p2-dlg-sub"></span></div>
-    <button type="button" class="p2-btn" id="p2-dlg-x">Fechar (Esc)</button>
+<dialog class="pc-dlg" id="pc-dlg" aria-labelledby="pc-dlg-tt">
+  <div class="pc-dlg__hd">
+    <div><h2 class="pc-dlg__tt" id="pc-dlg-tt">Agente</h2><span class="pc-dlg__sub" id="pc-dlg-sub"></span></div>
+    <button type="button" class="pc-btn" id="pc-dlg-x">Fechar (Esc)</button>
   </div>
-  <div class="p2-dlg__body" id="p2-dlg-body"></div>
+  <div class="pc-dlg__body" id="pc-dlg-body"></div>
 </dialog>
 
 <script type="module">
@@ -554,7 +255,7 @@ function criarKitLocal() {
   function selo() {
     document.documentElement.setAttribute('data-portal-dados', 'exemplo');
     if ($('[data-portal-selo]')) return;
-    const s = he('div', 'p2-selo', 'DADOS DE EXEMPLO', document.body);
+    const s = he('div', 'pc-selo', 'DADOS DE EXEMPLO', document.body);
     s.setAttribute('data-portal-selo', ''); s.setAttribute('role', 'status');
   }
   return {
@@ -650,592 +351,18 @@ function resumir(p, est) {
   };
 }
 
-/* ============================================================ geometria isométrica */
-const S = 150;                       // meia-largura de uma célula
-const KY = 0.6;                      // achatamento vertical
-const SKEW = (Math.atan(KY) * 180 / Math.PI).toFixed(2);   // inclinação do plano da frente de uma caixa
-const gx = (u, v) => (u - v) * S;
-const gy = (u, v, z = 0) => (u + v) * S * KY - z;
-const P = (u, v, z = 0) => [gx(u, v), gy(u, v, z)];
-const ptsStr = (pts) => pts.map((p) => p.map((n) => Math.round(n * 10) / 10).join(',')).join(' ');
-function poly(parent, pts, cls) { return se('polygon', { points: ptsStr(pts), class: cls }, parent); }
-function box(parent, u0, u1, v0, v1, z0, z1, tom) {
-  const g = se('g', { class: 'p2-box p2-t-' + tom }, parent);
-  poly(g, [P(u1, v0, z0), P(u1, v1, z0), P(u1, v1, z1), P(u1, v0, z1)], 'p2-f-r');
-  poly(g, [P(u0, v1, z0), P(u1, v1, z0), P(u1, v1, z1), P(u0, v1, z1)], 'p2-f-l');
-  poly(g, [P(u0, v0, z1), P(u1, v0, z1), P(u1, v1, z1), P(u0, v1, z1)], 'p2-f-t');
-  return g;
-}
-function linha(parent, a, b, cls) { return se('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: cls }, parent); }
-/* plano vertical voltado para a frente da mesa: x segue o eixo u, y sobe */
-function plano(parent, u, v, z) {
-  const b = P(u, v, z);
-  return se('g', { transform: `translate(${b[0]} ${b[1]}) skewY(${SKEW})` }, parent);
-}
-function lampada(parent, u, v) {
-  const b = P(u, v, 34);
-  se('circle', { cx: b[0] + 9, cy: b[1] - 25, r: 22, class: 'p2-halo' }, parent);
-  se('ellipse', { cx: b[0], cy: b[1], rx: 9, ry: 4.5, class: 'p2-prop-shade' }, parent);
-  linha(parent, b, [b[0] + 4, b[1] - 30], 'p2-prop-line');
-  se('path', { d: `M${b[0] - 6} ${b[1] - 28} L${b[0] + 18} ${b[1] - 24} L${b[0] + 12} ${b[1] - 40} Z`, class: 'p2-prop-shade' }, parent);
-  se('circle', { cx: b[0] + 9, cy: b[1] - 25, r: 3.5, class: 'p2-bulb' }, parent);
-}
-function telefone(parent, u, v) {
-  box(parent, u, u + 0.2, v, v + 0.17, 34, 41, 'ink');
-  box(parent, u + 0.01, u + 0.19, v + 0.01, v + 0.05, 41, 45, 'ink');
-  const c = P(u + 0.1, v + 0.09, 42);
-  se('circle', { cx: c[0], cy: c[1], r: 3, class: 'p2-prop-bulb' }, parent);
-}
-function pilhaPastas(parent, u, v, n = 3) {
-  const tons = ['wood', 'paper', 'wood', 'paper'];
-  for (let i = 0; i < n; i++) box(parent, u, u + 0.3, v, v + 0.22, 34 + i * 4, 38 + i * 4, tons[i % 4]);
-}
-/* adereços fixos de cada tipo. Atrás: antes da figura. Sobre a mesa: depois do tampo. A luminária é comum a todos. */
-function adereco(tipo) {
-  switch (tipo) {
-    case 'backend-dev': // arquivo de gavetas
-      return { atras(g) {
-        box(g, -0.5, -0.27, -0.5, -0.12, 0, 64, 'steel');
-        for (let i = 0; i < 3; i++) {
-          const z = 6 + i * 19;
-          poly(g, [P(-0.27, -0.46, z), P(-0.27, -0.16, z), P(-0.27, -0.16, z + 15), P(-0.27, -0.46, z + 15)], 'p2-prop-shade');
-          linha(g, P(-0.27, -0.36, z + 8), P(-0.27, -0.26, z + 8), 'p2-prop-line');
-        }
-      }, sobre(g) { pilhaPastas(g, -0.1, -0.25, 2); box(g, 0.2, 0.38, -0.2, 0, 34, 38, 'paper'); } };
-    case 'frontend-dev': // máquina de escrever
-      return { sobre(g) {
-        box(g, -0.2, 0.25, -0.24, -0.02, 34, 44, 'ink');
-        box(g, -0.22, 0.27, -0.23, -0.19, 44, 48, 'steel');
-        box(g, -0.08, 0.14, -0.215, -0.205, 48, 66, 'paper');
-        linha(g, P(-0.04, -0.21, 60), P(0.1, -0.21, 60), 'p2-prop-line');
-        linha(g, P(-0.04, -0.21, 54), P(0.08, -0.21, 54), 'p2-prop-line');
-      } };
-    case 'test-runner': // carimbo e almofada de tinta
-      return { sobre(g) {
-        box(g, 0, 0.12, -0.24, -0.12, 34, 41, 'stamp');
-        box(g, 0.02, 0.1, -0.22, -0.14, 41, 60, 'wood');
-        box(g, 0.18, 0.4, -0.24, -0.02, 34, 38, 'carbon');
-        box(g, -0.26, -0.03, -0.2, 0, 34, 37, 'paper');
-      } };
-    case 'explorer': // pilha de pastas e lupa
-      return { sobre(g) {
-        pilhaPastas(g, -0.26, -0.26, 4);
-        const c = P(0.2, -0.08, 44);
-        se('circle', { cx: c[0], cy: c[1], r: 9, class: 'p2-prop-ring' }, g);
-        linha(g, [c[0] + 7, c[1] + 7], [c[0] + 18, c[1] + 18], 'p2-prop-line');
-      } };
-    case 'prototype-dev': // pasta com croqui
-      return { sobre(g) { pilhaPastas(g, -0.12, -0.26, 2); box(g, 0.24, 0.42, -0.2, 0, 34, 35, 'paper'); } };
-    case 'am': // telefone e plaquinha
-      return { sobre(g) { telefone(g, 0.18, -0.24); box(g, -0.1, 0.1, 0.01, 0.07, 34, 42, 'stamp'); } };
-    default: // apoio: pasta e telefone
-      return { sobre(g) { pilhaPastas(g, -0.26, -0.26, 3); telefone(g, 0.2, -0.24); } };
-  }
-}
-
-/* ============================================================ estado da aplicação */
-const cena = $('#p2-scene'), cenaWrap = $('#p2-scenewrap'), labelsEl = $('#p2-labels'), balloonsEl = $('#p2-balloons');
-const app = {
-  estado: null, exemplo: false, sig: '', modo: 'normal', cfg: null, W: 0, H: 0,
-  seats: new Map(), seatList: [], execPosto: new Map(), porOriginal: new Map(), execPorId: new Map(), roster: new Map(),
-  cheios: new Set(), f0: 1, dimSig: '', vistas: new Set(), anteriorN: -1, fila: [], tocando: false, balaoTimer: null, devoTimer: null,
-  aberto: null, filtro: '',
-};
-let kMarca = 1;
-
-/* ---------- planejamento: grade, escala e rótulos escolhidos juntos ---------- */
-const PAD = 8;           // folga da cena, em px
-const NIV = { w: 216, cheio: 116, curto: 79 };   // rótulo de mesa: cheio (posto ativo) ou curto (posto parado), mesma largura
-const ATIVOS_MIN = 3;    // postos que a planta reserva como cheios, mesmo parados, para não refazer a cena a cada troca de estado
-const PRIO_RESERVA = ['am', 'prototype-dev', 'backend-dev', 'frontend-dev', 'test-runner', 'explorer', 'outro'];
-const cheioAgora = (res) => !!res && ATIVO.has(res.estado);
-const alturaRotulo = (res, cheio) => (cheio ? NIV.cheio : NIV.curto);
-const FOLGA_ROTULO = 3;
-
-/* extensão da figura (mesa, adereços, marcador e, se houver, o carimbo) em unidades, relativa à âncora da mesa */
-function extFig(k, slam) {
-  let x0 = -80, x1 = 112, y0 = -(151 + 34 * k);
-  if (slam) { x0 = Math.min(x0, 2 - 78 * k - 6); x1 = Math.max(x1, 10 + 78 * k + 6); y0 = Math.min(y0, -52 - 28 * k); }
-  return { x0, x1, y0, y1: 52 };
-}
-function geometria(n, C, R, passo, compacto, W, H, f = 1) {
-  const m = 0.7, parede = compacto ? 70 : 110;
-  const umin = -m, vmin = -m, umax = passo * (C - 1) + m, vmax = passo * (R - 1) + m;
-  const pts = [];
-  for (let k = 0; k < n; k++) {
-    const a = k % C, b = Math.floor(k / C);
-    pts.push({ a, b, u: passo * a, v: passo * b, X: gx(passo * a, passo * b), Y: gy(passo * a, passo * b) });
-  }
-  let k = 1, s = 0.2, e = null, bx = null;
-  for (let it = 0; it < 4; it++) {
-    e = extFig(k, !compacto);
-    let x0 = gx(umin, vmax), x1 = gx(umax, vmin), y0 = gy(umin, vmin, parede), y1 = gy(umax, vmax);
-    for (const p of pts) { x0 = Math.min(x0, p.X + e.x0); x1 = Math.max(x1, p.X + e.x1); y0 = Math.min(y0, p.Y + e.y0); y1 = Math.max(y1, p.Y + e.y1); }
-    bx = { x0, x1, y0, y1 };
-    s = Math.min((W - PAD * 2) / (x1 - x0), (H - PAD * 2) / (y1 - y0)) * f;
-    const novo = compacto ? clamp(0.65 / s, 1, 3.4) : clamp(0.55 / s, 1, 2.4);
-    if (Math.abs(novo - k) < 0.04) break;
-    k = Math.round(novo * 20) / 20;
-  }
-  const tx = Math.round((W - s * (bx.x1 - bx.x0)) / 2 - s * bx.x0);
-  const ty = Math.round((H - s * (bx.y1 - bx.y0)) / 2 - s * bx.y0);
-  return { C, R, passo, s, k, e, tx, ty, pts, umin, umax, vmin, vmax, parede };
-}
-function figsEstimadas(g) {
-  return g.pts.map((p) => ({
-    x0: g.tx + g.s * (p.X + g.e.x0) - 3, y0: g.ty + g.s * (p.Y + g.e.y0) - 3,
-    x1: g.tx + g.s * (p.X + g.e.x1) + 3, y1: g.ty + g.s * (p.Y + g.e.y1) + 3,
-  }));
-}
-const tocaRet = (a, b, g = 0) => a.x0 < b.x1 + g && a.x1 + g > b.x0 && a.y0 < b.y1 + g && a.y1 + g > b.y0;
-function candidatos(F, w, h) {
-  const g = 3, c = [], cx = (F.x0 + F.x1) / 2;
-  for (let j = 0; j <= 9; j++) {
-    for (const sg of (j ? [-1, 1] : [1])) {
-      const yb = F.y1 - h + sg * j * 10;
-      c.push([F.x1 + g, yb], [F.x0 - g - w, yb]);
-    }
-  }
-  for (let j = 0; j <= 9; j++) {
-    for (const sg of (j ? [-1, 1] : [1])) {
-      const xc = cx - w / 2 + sg * j * 12;
-      c.push([xc, F.y1 + g], [xc, F.y0 - h - g]);
-    }
-  }
-  return c;
-}
-/* Coloca um rótulo completo por mesa sem tocar em nenhuma mesa nem em outro rótulo. Com varrer, procura
-   qualquer vazio quando as posições vizinhas falham e liga o rótulo à mesa por um traço. */
-function colocar(figs, hs, W, H, varrer, passoVarredura = 4) {
-  const n = figs.length, out = new Array(n).fill(null), ocup = [], w = NIV.w;
-  const ctr = figs.map((F) => [(F.x0 + F.x1) / 2, (F.y0 + F.y1) / 2]);
-  let deg = 0, longe = 0;
-  const cabe = (r) => r.x0 >= 2 && r.y0 >= 2 && r.x1 <= W - 2 && r.y1 <= H - 2
-    && !figs.some((F) => tocaRet(r, F)) && !ocup.some((o) => tocaRet(r, o, FOLGA_ROTULO));
-  const ordem = [...figs.keys()].sort((i, j) => hs[j] - hs[i] || i - j);
-  for (const i of ordem) {
-    const F = figs[i], h = hs[i];
-    let ach = null;
-    for (const [x, y] of candidatos(F, w, h)) {
-      const r = { x0: x, y0: y, x1: x + w, y1: y + h };
-      if (!cabe(r)) continue;
-      const cx = x + w / 2, cy = y + h / 2, d = Math.hypot(cx - ctr[i][0], cy - ctr[i][1]);
-      let outro = false;
-      for (let j = 0; j < n; j++) if (j !== i && Math.hypot(cx - ctr[j][0], cy - ctr[j][1]) < d) { outro = true; break; }
-      const custo = d + (outro ? 400 : 0);
-      if (!ach || custo < ach.custo) ach = { x, y, w, h, custo };
-    }
-    if (!ach && varrer) {
-      for (let y = 2; y <= H - h - 2; y += passoVarredura) {
-        for (let x = 2; x <= W - w - 2; x += passoVarredura) {
-          const r = { x0: x, y0: y, x1: x + w, y1: y + h };
-          if (!cabe(r)) continue;
-          const d = Math.hypot(x + w / 2 - ctr[i][0], y + h / 2 - ctr[i][1]);
-          if (!ach || d < ach.custo) ach = { x, y, w, h, custo: d };
-        }
-      }
-    }
-    if (!ach) { deg += 10; continue; }
-    const dx = Math.max(F.x0 - (ach.x + w), ach.x - F.x1, 0), dy = Math.max(F.y0 - (ach.y + h), ach.y - F.y1, 0);
-    ach.ligar = Math.hypot(dx, dy) > 14;
-    if (ach.ligar) longe += Math.hypot(dx, dy) / 400;
-    out[i] = ach;
-    ocup.push({ x0: ach.x, y0: ach.y, x1: ach.x + w, y1: ach.y + h });
-  }
-  return { out, deg, longe };
-}
-/* grade, espaçamento e escala: a maior escala em que todos os rótulos cabem sem tocar nas mesas */
-function escolher(n, hs, W, H, compacto, f0 = 1) {
-  const passos = compacto ? [1.0, 1.2, 1.5] : [1.3, 1.5, 1.7, 1.95, 2.2];
-  let melhor = null;
-  for (let R = 1; R <= n; R++) {
-    const C = Math.ceil(n / R);
-    if ((R - 1) * C >= n || C / R > 5 || R / C > 5) continue;
-    for (const passo of passos) {
-      let f = f0, g = geometria(n, C, R, passo, compacto, W, H, f), deg = 0, longe = 0;
-      if (!compacto) {
-        for (let it = 0; it < 16; it++) {
-          const c = colocar(figsEstimadas(g), hs, W, H, true, 12);
-          deg = c.deg; longe = c.longe;
-          if (!deg) break;
-          f *= 0.94; g = geometria(n, C, R, passo, compacto, W, H, f);
-        }
-      }
-      const q = g.s - (deg ? 1 : 0) - 0.1 * longe;
-      if (!melhor || q > melhor.q) melhor = { q, g };
-    }
-  }
-  return melhor.g;
-}
-
-/* ---------- desenho dos postos ---------- */
-const MARCADOR_X = 46;
-function cadeira(g) {
-  const b = P(-0.1, -0.45);
-  const p = se('g', { transform: `translate(${b[0]} ${b[1]})` }, g);
-  se('ellipse', { cx: 0, cy: 0, rx: 22, ry: 9, class: 'p2-shadow' }, p);
-  se('rect', { x: -17, y: -58, width: 34, height: 40, rx: 8, class: 'p2-chair' }, p);
-  se('ellipse', { cx: 0, cy: -14, rx: 21, ry: 9, class: 'p2-chair' }, p);
-  return p;
-}
-/* monólito preto com monograma e faixa de luz */
-function figMonolito(g, info) {
-  cadeira(g);
-  // face frontal: 69 de largura por 72 de altura. Monograma na faixa livre acima dos adereços, faixa de luz à direita
-  box(g, -0.14, 0.32, -0.31, -0.2, 34, 106, 'mono');
-  const pl = plano(g, -0.14, -0.2, 34);
-  se('text', { x: 25, y: -48, class: 'p2-mono-d' }, pl).textContent = info.mono;
-  se('rect', { x: 56, y: -62, width: 8, height: 52, class: 'p2-bandglow' }, pl);
-  se('rect', { x: 58, y: -58, width: 4, height: 44, class: 'p2-band' }, pl);
-}
-function desenharAssento(layer, s) {
-  const g = se('g', { class: 'p2-seat', transform: `translate(${s.X} ${s.Y})`, 'data-tipo': s.tipo, 'data-estado': 'ocioso', 'data-p2-posto': s.tipo }, layer);
-  const ad = adereco(s.tipo);
-  if (ad.atras) ad.atras(g);
-  const desk = s.tipo === 'am' ? [-0.46, 0.46, -0.3, 0.14] : [-0.42, 0.42, -0.3, 0.1];
-  box(g, desk[0], desk[1], desk[2], desk[3], 0, 34, 'wood');
-  linha(g, P(desk[1], desk[2], 17), P(desk[1], desk[3], 17), 'p2-prop-line');
-  figMonolito(g, s);
-  lampada(g, -0.4, -0.24);
-  ad.sobre(g);
-  // pastas abertas: uma por execução ativa, até quatro, na frente do tampo
-  const pastas = [];
-  for (let i = 0; i < 4; i++) {
-    const u0 = -0.4 + i * 0.2, pg = se('g', { class: 'p2-pasta is-off' }, g);
-    box(pg, u0, u0 + 0.075, 0.0, 0.09, 34, 35.5, 'wood');
-    box(pg, u0 + 0.085, u0 + 0.16, 0.0, 0.09, 34, 35.5, 'wood');
-    box(pg, u0 + 0.01, u0 + 0.07, 0.01, 0.08, 35.5, 36.5, 'paper');
-    box(pg, u0 + 0.09, u0 + 0.15, 0.01, 0.08, 35.5, 36.5, 'paper');
-    pastas.push(pg);
-  }
-  // carimbo de devolução sobre a mesa
-  const sl = se('g', { class: 'p2-slam', transform: `translate(6 -52) rotate(-9) scale(${kMarca})` }, g);
-  se('rect', { x: -78, y: -18, width: 156, height: 36 }, sl);
-  se('text', { x: 0, y: 1 }, sl).textContent = 'DEVOLVIDA';
-  // marcador de estado: forma própria por estado, acima da figura, ampliado quando a cena é pequena
-  const mk = se('g', { class: 'p2-marker', transform: `translate(${MARCADOR_X} ${-(150 + 17 * kMarca)}) scale(${kMarca})` }, g);
-  se('circle', { r: 17, class: 'p2-marker-plate' }, mk);
-  const us = se('use', { href: '#p2-g-ocioso', x: -13, y: -13, width: 26, height: 26 }, mk);
-  return { g, us, pastas };
-}
-function desenharParedes(layer, pl) {
-  const { umin, umax, vmin, vmax, parede } = pl;
-  const wr = [P(umin, vmin, 0), P(umax, vmin, 0), P(umax, vmin, parede), P(umin, vmin, parede)];
-  const wl = [P(umin, vmin, 0), P(umin, vmax, 0), P(umin, vmax, parede), P(umin, vmin, parede)];
-  poly(layer, wr, 'p2-wall-r'); poly(layer, wl, 'p2-wall-l');
-  poly(layer, [P(umin, vmin, 0), P(umax, vmin, 0), P(umax, vmin, 14), P(umin, vmin, 14)], 'p2-skirt');
-  poly(layer, [P(umin, vmin, 0), P(umin, vmax, 0), P(umin, vmax, 14), P(umin, vmin, 14)], 'p2-skirt');
-  const zj0 = parede * 0.5, zj1 = parede * 0.9;
-  const nJ = Math.max(2, Math.floor((umax - umin) / 1.5));
-  const larguraJ = (umax - umin) / nJ;
-  for (let i = 0; i < nJ; i++) {
-    const a = umin + i * larguraJ + larguraJ * 0.2, b = umin + (i + 1) * larguraJ - larguraJ * 0.2;
-    poly(layer, [P(a, vmin, zj0), P(b, vmin, zj0), P(b, vmin, zj1), P(a, vmin, zj1)], 'p2-window');
-    linha(layer, P((a + b) / 2, vmin, zj0), P((a + b) / 2, vmin, zj1), 'p2-windowbar');
-    linha(layer, P(a, vmin, (zj0 + zj1) / 2), P(b, vmin, (zj0 + zj1) / 2), 'p2-windowbar');
-  }
-  const nD = Math.max(2, Math.floor((vmax - vmin) / 1.2));
-  const lD = (vmax - vmin) / nD;
-  for (let i = 0; i < nD; i++) {
-    const a = vmin + i * lD + lD * 0.12, b = vmin + (i + 1) * lD - lD * 0.12;
-    for (let r = 0; r < 3; r++) {
-      const z0 = 20 + r * 28;
-      poly(layer, [P(umin, a, z0), P(umin, b, z0), P(umin, b, z0 + 23), P(umin, a, z0 + 23)], 'p2-drawer');
-      linha(layer, P(umin, (a + b) / 2 - 0.08, z0 + 12), P(umin, (a + b) / 2 + 0.08, z0 + 12), 'p2-prop-line');
-    }
-  }
-  const rel = P((umin + umax) / 2, vmin, parede - 18);
-  se('circle', { cx: rel[0], cy: rel[1], r: 14, class: 'p2-clock' }, layer);
-  se('path', { d: `M${rel[0]} ${rel[1]} V${rel[1] - 9} M${rel[0]} ${rel[1]} L${rel[0] + 7} ${rel[1] + 3}`, class: 'p2-clockhand' }, layer);
-}
-function desenharChao(layer, pl) {
-  const { umin, umax, vmin, vmax } = pl;
-  poly(layer, [P(umin, vmin), P(umax, vmin), P(umax, vmax), P(umin, vmax)], 'p2-floor');
-  const t = 0.8;
-  for (let u = umin + t; u < umax; u += t) linha(layer, P(u, vmin), P(u, vmax), 'p2-gridline');
-  for (let v = vmin + t; v < vmax; v += t) linha(layer, P(umin, v), P(umax, v), 'p2-gridline');
-}
-function desenharSalaDirecao(layer, s) {
-  // tapete da direção: fica dentro do piso da própria mesa (passo mínimo 1,3 deixa 0,84 até a mesa vizinha)
-  poly(layer, [P(s.u - 0.5, s.v - 0.55), P(s.u + 0.5, s.v - 0.55), P(s.u + 0.5, s.v + 0.25), P(s.u - 0.5, s.v + 0.25)], 'p2-rug');
-}
-
-/* ---------- rótulos: HTML em pixels fixos (cena) ou lista de postos (compacto) ---------- */
-function glifo(estado) {
-  const svg = se('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
-  const u = se('use', { href: '#p2-g-' + estado }, svg);
-  svg.__use = u;
-  return svg;
-}
-function criarRotulo(pai, tipo) {
-  const b = he('button', 'p2-lbl', null, pai);
-  b.type = 'button'; b.setAttribute('data-p2-posto', tipo);
-  const hd = he('span', 'p2-lbl__hd', null, b);
-  const nome = he('span', 'p2-lbl__nome', '', hd);
-  const mod = he('span', 'p2-lbl__mod', '', hd);
-  const st = he('span', 'p2-st', null, b);
-  const gl = glifo('ocioso'); st.appendChild(gl);
-  const stt = he('span', 'p2-st__t', '', st);
-  const cnt = he('span', 'p2-lbl__cnt', '', b);
-  const ativ = he('span', 'p2-lbl__ativ', '', b);
-  const tar = he('span', 'p2-lbl__tar', '', b);
-  return { b, nome, mod, st, gl, stt, cnt, ativ, tar };
-}
-function preencherRotulo(r, p) {
-  const R = p.res, estado = R.estado;
-  r.b.setAttribute('data-estado', estado);
-  r.st.setAttribute('data-estado', estado);
-  r.nome.textContent = p.nome;
-  r.mod.textContent = R.modeloCurto;
-  r.mod.title = R.modelo || 'modelo não informado';
-  r.stt.textContent = ESTADO_TXT[estado] || estado;
-  r.gl.__use.setAttribute('href', '#p2-g-' + estado);
-  r.cnt.textContent = R.contagem;
-  r.ativ.textContent = R.atividade;
-  r.tar.replaceChildren();
-  if (R.tarefas.length) {
-    r.tar.append(R.tarefas.length === 1 ? 'tarefa ' : 'tarefas ');
-    R.tarefas.slice(0, 4).forEach((id, i) => { if (i) r.tar.append(' '); he('span', 'p2-tid', id, r.tar); });
-    if (R.tarefas.length > 4) r.tar.append(` +${R.tarefas.length - 4}`);
-  } else r.tar.textContent = 'sem tarefa ativa';
-  if (r.cena) { r.ativ.hidden = !cheioAgora(R); r.tar.hidden = !cheioAgora(R) && !R.tarefas.length; }
-  r.b.setAttribute('aria-label', `${p.nome}, ${ESTADO_TXT[estado] || estado}, ${R.contagem}, ${R.atividade}. Abrir painel.`);
-  if (r.tk) r.tk.textContent = `entrada ${fmt(R.tok.entrada)} · saída ${fmt(R.tok.saida)} · cache ${fmt(R.tok.cache)}`;
-}
-
-/* ---------- reconstrução da cena (só quando muda o elenco, o modo ou o tamanho) ---------- */
-function reconstruir(lista, compacto, W, H) {
-  // postos cheios no plano: os ativos agora, os que já foram cheios e uma reserva mínima
-  for (const p of lista) if (cheioAgora(p.res)) app.cheios.add(p.tipo);
-  for (const t of PRIO_RESERVA) { if (app.cheios.size >= Math.min(ATIVOS_MIN, lista.length)) break; if (lista.some((p) => p.tipo === t)) app.cheios.add(t); }
-  const hs = lista.map((p) => (app.cheios.has(p.tipo) ? NIV.cheio : NIV.curto));
-  const cfg = escolher(lista.length, hs, W, H, compacto, app.f0);
-  app.cfg = cfg; app.W = W; app.H = H; app.modo = compacto ? 'compacto' : 'normal';
-  kMarca = cfg.k;
-  $('#p2-main').setAttribute('data-modo', app.modo);
-  cena.replaceChildren(); labelsEl.replaceChildren(); balloonsEl.replaceChildren();
-  cena.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  cena.style.setProperty('--p2-inv', String(Math.round(1000 / cfg.s) / 1000));
-  if (compacto) { cena.setAttribute('aria-hidden', 'true'); cena.removeAttribute('role'); cena.removeAttribute('aria-label'); }
-  else { cena.removeAttribute('aria-hidden'); cena.setAttribute('role', 'group'); cena.setAttribute('aria-label', 'Escritório isométrico: cada agente tem a própria mesa'); }
-  const world = se('g', { class: 'p2-world', transform: `translate(${cfg.tx} ${cfg.ty}) scale(${cfg.s})` }, cena);
-  const gFundo = se('g', null, world), gRing = se('g', null, world), gSeats = se('g', null, world);
-  app.gFly = se('g', null, world);
-  desenharChao(gFundo, cfg); desenharParedes(gFundo, cfg);
-  app.seats = new Map();
-  app.seatList = lista.map((p, i) => ({ tipo: p.tipo, nome: p.nome, mono: p.mono, ...cfg.pts[i], idx: i }));
-  const ordem = [...app.seatList].sort((x, y) => (x.a + x.b) - (y.a + y.b) || x.a - y.a);
-  for (const s of ordem) if (s.tipo === 'am') desenharSalaDirecao(gFundo, s);
-  for (const s of ordem) {
-    const d = desenharAssento(gSeats, s);
-    s.g = d.g; s.us = d.us; s.pastas = d.pastas;
-    s.ring = poly(gRing, [P(s.u - 0.5, s.v - 0.55), P(s.u + 0.5, s.v - 0.55), P(s.u + 0.5, s.v + 0.25), P(s.u - 0.5, s.v + 0.25)], 'p2-ring');
-    app.seats.set(s.tipo, s);
-  }
-  app.leaders = null;
-  if (!compacto) {
-    app.leaders = document.createElementNS(NS, 'svg');
-    app.leaders.setAttribute('class', 'p2-leaders'); app.leaders.setAttribute('aria-hidden', 'true');
-    labelsEl.appendChild(app.leaders);
-    for (const s of app.seatList) {
-      s.r = criarRotulo(labelsEl, s.tipo);
-      s.r.b.classList.add('p2-lbl--cena'); s.r.cena = true;
-      s.r.b.hidden = true;
-    }
-  }
-  const ros = $('#p2-roster'); ros.replaceChildren();
-  app.roster = new Map();
-  if (compacto) {
-    for (const s of app.seatList) {
-      const li = he('li', null, null, ros);
-      const r = criarRotulo(li, s.tipo);
-      r.tk = he('span', 'p2-tk', '', r.b);
-      app.roster.set(s.tipo, r);
-    }
-  }
-}
-function medirMesas() {
-  const base = cenaWrap.getBoundingClientRect();
-  const ox = base.left + cenaWrap.clientLeft, oy = base.top + cenaWrap.clientTop;
-  for (const s of app.seatList) {
-    s.g.classList.add('p2-measure');
-    const r = s.g.getBoundingClientRect();
-    s.g.classList.remove('p2-measure');
-    s.fig = { x0: r.left - ox - 4, y0: r.top - oy - 4, x1: r.right - ox + 4, y1: r.bottom - oy + 4 };
-  }
-}
-function posicionar() {
-  if (app.modo !== 'normal' || !app.seatList.length) return 0;
-  const res = colocar(app.seatList.map((s) => s.fig), app.seatList.map((s) => s.hAtual), app.W, app.H, true);
-  const L = app.leaders;
-  if (L) L.replaceChildren();
-  app.seatList.forEach((s, i) => {
-    if (!s.r) return;
-    const p = res.out[i];
-    if (!p) { s.r.b.hidden = true; return; }
-    const st = s.r.b.style;
-    st.left = Math.round(p.x) + 'px'; st.top = Math.round(p.y) + 'px'; st.width = p.w + 'px'; st.height = s.hAtual + 'px';
-    s.r.b.hidden = false;
-    if (p.ligar && L) {
-      const F = s.fig;
-      se('line', { x1: p.x + p.w / 2, y1: p.y + p.h / 2, x2: (F.x0 + F.x1) / 2, y2: (F.y0 + F.y1) / 2 }, L);
-    }
-  });
-  return res.deg;
-}
-function atualizarCena(tentativa = 0) {
-  const est = app.estado; if (!est) return;
-  const compacto = !matchMedia('(min-width:1100px)').matches;
-  const W = cenaWrap.clientWidth, H = cenaWrap.clientHeight;
-  if (W < 80 || H < 80) return;
-  const lista = montarPostos(est.agentes);
-  for (const p of lista) p.res = resumir(p, est);
-  const sig = [compacto ? 'c' : 'n', W, H, ...lista.map((p) => p.tipo)].join('|');
-  const dimSig = [compacto, W, H].join('|');
-  if (dimSig !== app.dimSig) { app.dimSig = dimSig; app.f0 = 1; }
-  if (sig !== app.sig) { app.sig = sig; reconstruir(lista, compacto, W, H); }
-  for (const p of lista) {
-    const s = app.seats.get(p.tipo); if (!s) continue;
-    s.res = p.res;
-    s.hAtual = alturaRotulo(p.res, cheioAgora(p.res));
-    const estado = p.res.estado;
-    s.g.setAttribute('data-estado', estado);
-    s.us.setAttribute('href', '#p2-g-' + estado);
-    s.g.classList.toggle('has-devolucao', p.res.devolvida);
-    const nPastas = Math.min(4, p.res.ativas.length);
-    s.pastas.forEach((pg, i) => pg.classList.toggle('is-off', i >= nPastas));
-    if (s.r) preencherRotulo(s.r, p);
-    if (app.roster.has(p.tipo)) preencherRotulo(app.roster.get(p.tipo), p);
-  }
-  if (!compacto) {
-    medirMesas();
-    if (posicionar() > 0) {
-      // algum rótulo não coube: reserva espaço cheio para os postos ativos e, se já era assim, reduz a planta
-      const antes = app.cheios.size;
-      for (const p of lista) if (cheioAgora(p.res)) app.cheios.add(p.tipo);
-      if (tentativa < 8 && (app.cheios.size > antes || app.f0 > 0.35)) {
-        if (app.cheios.size === antes) app.f0 *= 0.9;
-        app.sig = ''; atualizarCena(tentativa + 1);
-      }
-    }
-  }
-}
-
-/* ============================================================ voo de objetos */
-function resolverSeat(ref) {
-  const t = postoDeRef(ref);
-  return (t && app.seats.get(t)) || app.seats.get('am') || null;
-}
-function objetoVoo(tipo, g) {
-  const o = se('g', { class: 'p2-fly p2-fly--' + tipo }, g);
-  if (tipo === 'delegacao') {
-    se('path', { d: 'M-18 -11 h13 l4 5 h19 v22 h-36 z', class: 'p2-fly__pasta' }, o);
-    se('path', { d: 'M-12 2 h24 M-12 8 h16', class: 'p2-fly__linha' }, o);
-  } else if (tipo === 'retorno') {
-    se('rect', { x: -13, y: -16, width: 26, height: 32, class: 'p2-fly__memo' }, o);
-    se('path', { d: 'M-8 -6 h16 M-8 0 h16 M-8 6 h10', class: 'p2-fly__linha' }, o);
-    se('path', { d: 'M6 -22 v14 a3 3 0 0 1 -6 0 v-11', class: 'p2-fly__clip' }, o);
-  } else if (tipo === 'devolucao') {
-    const f = se('g', { transform: 'scale(1.7)' }, o);
-    se('path', { d: 'M-18 -11 h13 l4 5 h19 v22 h-36 z', class: 'p2-fly__dev' }, f);
-    se('rect', { x: -15, y: -1, width: 30, height: 12, class: 'p2-fly__devtag' }, f);
-    se('text', { x: 0, y: 5.5, class: 'p2-fly__devtxt' }, f).textContent = 'DEVOLVIDA';
-  } else if (tipo === 'veredito') {
-    se('circle', { r: 17, class: 'p2-fly__sealA' }, o);
-    se('circle', { r: 11, class: 'p2-fly__sealB' }, o);
-    se('path', { d: 'M-5 0 l4 4 l8 -8', class: 'p2-fly__linha', style: 'stroke:var(--paper);stroke-width:3' }, o);
-  } else {
-    se('path', { d: 'M-14 -9 h28 v18 h-28 z M-14 -9 l14 11 l14 -11', class: 'p2-fly__env' }, o);
-  }
-  return o;
-}
-async function voar(o, A, B, dur, tipo) {
-  const kObj = app.cfg ? clamp(0.75 / app.cfg.s, 1, 3) : 1;
-  const dist = Math.hypot(B.x - A.x, B.y - A.y);
-  const arco = Math.max(46, Math.min(130, dist * 0.28)) * kObj * 0.6;
-  const kf = [];
-  const N = 22;
-  for (let i = 0; i <= N; i++) {
-    const t = i / N, e = t * t * (3 - 2 * t);
-    const x = A.x + (B.x - A.x) * e, y = A.y + (B.y - A.y) * e - Math.sin(Math.PI * e) * arco;
-    const rot = tipo === 'devolucao' ? Math.sin(t * 20) * 14 : (e - 0.5) * 24;
-    const esc = (tipo === 'devolucao' ? 1 + Math.sin(Math.PI * t) * 0.25 : 1) * kObj;
-    kf.push({ transform: `translate(${x}px,${y}px) rotate(${rot}deg) scale(${esc})`, offset: t });
-  }
-  o.style.transform = kf[0].transform;
-  try { await o.animate(kf, { duration: dur, fill: 'forwards', easing: 'linear' }).finished; } catch { /* cancelado */ }
-}
-function ancora(s) { return { x: s.X, y: s.Y - 56 }; }
-
-function mostrarBalao(f, seat) {
-  clearTimeout(app.balaoTimer);
-  balloonsEl.replaceChildren();
-  if (app.modo !== 'normal' || !seat || !seat.fig) return;
-  const el = he('div', 'p2-balloon', null, balloonsEl);
-  el.setAttribute('data-tipo', f.tipo);
-  const inn = he('div', 'p2-balloon__in', null, el);
-  he('span', 'p2-balloon__h', `${TIPO_FALA[f.tipo] || f.tipo} · ${nomeRef(f.de)} → ${nomeRef(f.para)}`, inn);
-  he('p', 'p2-balloon__t', f.texto, inn);
-  const h = el.offsetHeight, w = el.offsetWidth, F = seat.fig;
-  const x = clamp((F.x0 + F.x1) / 2 - w / 2, 6, Math.max(6, app.W - w - 6));
-  let y = F.y0 - h - 6;
-  if (y < 6) y = Math.min(F.y1 + 6, app.H - h - 6);
-  el.style.left = Math.round(x) + 'px'; el.style.top = Math.round(Math.max(6, y)) + 'px';
-  app.balaoTimer = setTimeout(() => balloonsEl.replaceChildren(), 5200);
-}
-function mostrarFaixaDevolucao(f) {
-  const d = $('#p2-devo');
-  $('#p2-devo-d').textContent = `${nomeRef(f.de)} devolve${f.tarefa ? ' ' + f.tarefa : ''} a ${nomeRef(f.para)}: ${f.texto}`;
-  d.hidden = true; void d.offsetWidth; d.hidden = false;
-  clearTimeout(app.devoTimer);
-  app.devoTimer = setTimeout(() => { d.hidden = true; }, 8000);
-}
-async function animarFala(f) {
-  const a = resolverSeat(f.de), b = resolverSeat(f.para);
-  if (f.tipo === 'devolucao') mostrarFaixaDevolucao(f);
-  if (!a || !b) return;
-  const reduz = reduzMovimento();
-  const chegada = () => {
-    if (b.ring) { b.ring.classList.add('is-recebe'); setTimeout(() => b.ring && b.ring.classList.remove('is-recebe'), 1800); }
-    if (f.tipo === 'devolucao') { b.g.classList.remove('is-devolvido'); void b.g.getBoundingClientRect(); b.g.classList.add('is-devolvido'); setTimeout(() => b.g.classList.remove('is-devolvido'), 8000); }
-    mostrarBalao(f, b);
-  };
-  if (reduz || !app.gFly || !app.gFly.isConnected) { chegada(); await esperar(900); return; }
-  const A = ancora(a), B = ancora(b);
-  if (f.tipo === 'devolucao') {
-    const trilha = se('path', { class: 'p2-trail', d: `M${A.x} ${A.y} Q${(A.x + B.x) / 2} ${Math.min(A.y, B.y) - 90} ${B.x} ${B.y}` }, app.gFly);
-    setTimeout(() => trilha.remove(), 4200);
-  }
-  const o = objetoVoo(f.tipo, app.gFly);
-  await voar(o, A, B, f.tipo === 'devolucao' ? 2300 : 1600, f.tipo);
-  o.remove();
-  chegada();
-  await esperar(f.tipo === 'devolucao' ? 1800 : 700);
-}
-async function esvaziarFila() {
-  if (app.tocando) return;
-  app.tocando = true;
-  while (app.fila.length) {
-    if (app.fila.length > 6) app.fila.splice(0, app.fila.length - 6);
-    const f = app.fila.shift();
-    try { await animarFala(f); } catch { /* animação nunca derruba o portal */ }
-  }
-  app.tocando = false;
-}
-
-/* ============================================================ painéis */
 function atualizarTotais(est, postos) {
-  $('#p2-sessao').textContent = String(est.sessao || '—').slice(0, 8);
-  $('#p2-brand').title = 'sessão ' + (est.sessao || '—');
-  const chip = $('#p2-modo');
+  $('#pc-sessao').textContent = String(est.sessao || '—').slice(0, 8);
+  $('#pc-brand').title = 'sessão ' + (est.sessao || '—');
+  const chip = $('#pc-modo');
   chip.textContent = app.exemplo ? 'dados de exemplo' : est.modo === 'replay' ? 'replay' : 'ao vivo';
   chip.setAttribute('data-modo', app.exemplo ? 'exemplo' : est.modo || '');
-  $('#p2-atualizado').textContent = dataHora(est.atualizadoEm);
+  $('#pc-atualizado').textContent = dataHora(est.atualizadoEm);
   const t = est.totais || {};
   const ativos = postos.filter((p) => p.execs.some((a) => ATIVO.has(a.estado))).length;
-  $('#p2-t-ativos').textContent = `${ativos} de ${postos.length}`;
-  $('#p2-t-exec').textContent = fmt(est.agentes.length);
-  const num = [['#p2-t-ent', t.tokensEntrada], ['#p2-t-sai', t.tokensSaida], ['#p2-t-cac', t.tokensCache]];
+  $('#pc-t-ativos').textContent = `${ativos} de ${postos.length}`;
+  $('#pc-t-exec').textContent = fmt(est.agentes.length);
+  const num = [['#pc-t-ent', t.tokensEntrada], ['#pc-t-sai', t.tokensSaida], ['#pc-t-cac', t.tokensCache]];
   for (const [sel, v] of num) { const el = $(sel); el.textContent = fmtC(v); el.title = fmt(v); }
 }
 function nomeDono(dono) {
@@ -1243,16 +370,16 @@ function nomeDono(dono) {
   return t ? INFO[t].nome : 'sem dono';
 }
 function criarCard(t, pai) {
-  const li = he('li', 'p2-card', null, pai);
+  const li = he('li', 'pc-card', null, pai);
   li.setAttribute('data-tarefa', t.id);
-  const top = he('div', 'p2-card__top', null, li);
-  he('span', 'p2-card__id', t.id, top);
-  const dv = he('span', 'p2-card__dev', `devol. ${t.devolucoes}`, top);
+  const top = he('div', 'pc-card__top', null, li);
+  he('span', 'pc-card__id', t.id, top);
+  const dv = he('span', 'pc-card__dev', `devol. ${t.devolucoes}`, top);
   dv.setAttribute('data-n', String(t.devolucoes));
   dv.setAttribute('aria-label', `devoluções: ${t.devolucoes}`);
   dv.title = `devoluções: ${t.devolucoes}`;
-  he('p', 'p2-card__t', t.titulo, li);
-  he('p', 'p2-card__o', 'dono: ' + nomeDono(t.dono), li);
+  he('p', 'pc-card__t', t.titulo, li);
+  he('p', 'pc-card__o', 'dono: ' + nomeDono(t.dono), li);
   if (t.veredito) li.title = 'Veredito: ' + t.veredito;
   return li;
 }
@@ -1262,28 +389,28 @@ function atualizarQuadro(est) {
   if (sig === sigQuadro) return; sigQuadro = sig;
   const cols = [...COLUNAS];
   if (est.tarefas.some((t) => t.estado === 'bloqueada')) cols.push(['bloqueada', 'Bloqueada']);
-  const board = $('#p2-board'); board.replaceChildren();
+  const board = $('#pc-board'); board.replaceChildren();
   for (const [chave, titulo] of cols) {
     const lista = est.tarefas.filter((t) => t.estado === chave);
-    const col = he('section', 'p2-col', null, board);
+    const col = he('section', 'pc-col', null, board);
     col.setAttribute('data-col', chave);
-    const hd = he('h3', 'p2-col__hd', titulo, col);
-    he('span', 'p2-col__n', String(lista.length), hd);
-    const ul = he('ul', 'p2-cards', null, col);
-    if (!lista.length) he('li', 'p2-empty', 'nenhuma tarefa', ul);
+    const hd = he('h3', 'pc-col__hd', titulo, col);
+    he('span', 'pc-col__n', String(lista.length), hd);
+    const ul = he('ul', 'pc-cards', null, col);
+    if (!lista.length) he('li', 'pc-empty', 'nenhuma tarefa', ul);
     for (const t of lista) criarCard(t, ul);
   }
   const apr = est.tarefas.filter((t) => t.estado === 'aprovada');
-  $('#p2-aprov-n').textContent = `Aprovadas · ${apr.length}`;
-  const al = $('#p2-aprov-list'); al.replaceChildren();
+  $('#pc-aprov-n').textContent = `Aprovadas · ${apr.length}`;
+  const al = $('#pc-aprov-list'); al.replaceChildren();
   for (const t of apr) criarCard(t, al);
-  $('#p2-n-tarefas').textContent = `${est.tarefas.length} tarefas`;
+  $('#pc-n-tarefas').textContent = `${est.tarefas.length} tarefas`;
 }
 let sigFiltro = '';
 function atualizarFiltro(postos) {
   const sig = postos.map((p) => p.tipo).join('|');
   if (sig === sigFiltro) return; sigFiltro = sig;
-  const sel = $('#p2-filtro'); const atual = sel.value;
+  const sel = $('#pc-filtro'); const atual = sel.value;
   sel.replaceChildren(he('option', null, 'Todos os agentes'));
   sel.firstChild.value = '';
   for (const p of postos) { const o = he('option', null, p.nome, sel); o.value = p.tipo; }
@@ -1297,30 +424,30 @@ function envolve(f, tipo) {
 }
 function filtrarLog() {
   const falasPorId = new Map(app.estado.falas.map((f) => [f.id, f]));
-  for (const li of $('#p2-log').children) {
+  for (const li of $('#pc-log').children) {
     const f = falasPorId.get(li.getAttribute('data-fala'));
     li.hidden = !(f && envolve(f, app.filtro));
   }
 }
 function criarEntradaLog(f) {
-  const li = he('li', 'p2-log');
+  const li = he('li', 'pc-log');
   li.setAttribute('data-tipo', f.tipo); li.setAttribute('data-fala', f.id);
-  const top = he('div', 'p2-log__top', null, li);
+  const top = he('div', 'pc-log__top', null, li);
   li.setAttribute('data-ts', String(f.ts));
   const tm = he('time', null, hora(f.ts), top); tm.setAttribute('datetime', f.ts); tm.title = dataHora(f.ts);
-  he('span', 'p2-tag', TIPO_FALA[f.tipo] || f.tipo, top);
-  const quem = he('span', 'p2-log__quem', `${nomeRef(f.de)} → ${nomeRef(f.para)}`, top);
+  he('span', 'pc-tag', TIPO_FALA[f.tipo] || f.tipo, top);
+  const quem = he('span', 'pc-log__quem', `${nomeRef(f.de)} → ${nomeRef(f.para)}`, top);
   quem.title = quem.textContent;
-  if (f.tarefa) he('span', 'p2-tid', f.tarefa, top);
-  const r = he('button', 'p2-log__rever', 'Rever', top);
+  if (f.tarefa) he('span', 'pc-tid', f.tarefa, top);
+  const r = he('button', 'pc-log__rever', 'Rever', top);
   r.type = 'button'; r.setAttribute('data-rever', f.id);
   r.setAttribute('aria-label', `Rever animação: ${TIPO_FALA[f.tipo] || f.tipo}, ${nomeRef(f.de)} para ${nomeRef(f.para)}`);
-  const tx = he('button', 'p2-log__txt', f.texto, li);
+  const tx = he('button', 'pc-log__txt', f.texto, li);
   tx.type = 'button'; tx.setAttribute('aria-expanded', 'false');
   return li;
 }
 function atualizarLog(est) {
-  const ul = $('#p2-log');
+  const ul = $('#pc-log');
   const falas = [...est.falas].sort((a, b) => String(a.ts).localeCompare(String(b.ts)));
   const encolheu = falas.length < ul.children.length;
   if (encolheu) { ul.replaceChildren(); app.vistas.clear(); }
@@ -1345,23 +472,15 @@ function atualizarLog(est) {
   filtrarLog();
   if (encolheu) ul.scrollTop = 0;
   else if (ancora && ancora.isConnected) ul.scrollTop = ancora.offsetTop - desvio;
-  $('#p2-n-falas').textContent = `${est.falas.length} falas`;
-  const tx = $('#p2-telex'); tx.replaceChildren();
-  const ult = falas[falas.length - 1];
-  if (!ult) he('li', 'p2-telex__vazio', 'Fita de telex em silêncio: nenhuma fala ainda.', tx);
-  else {
-    const li = he('li', novas.length ? 'is-novo' : null, null, tx);
-    li.setAttribute('data-tipo', ult.tipo);
-    he('time', null, hora(ult.ts), li);
-    he('span', null, `${(TIPO_FALA[ult.tipo] || ult.tipo).toUpperCase()} ${nomeRef(ult.de)} → ${nomeRef(ult.para)}: ${ult.texto}`, li);
-  }
+  $('#pc-n-falas').textContent = `${est.falas.length} falas`;
   return { novas, encolheu };
 }
 
 /* ============================================================ painel do posto e detalhe da execução */
-const dlg = $('#p2-dlg');
+const dlg = $('#pc-dlg');
+let opener = null;
 function focoDe(tipo) {
-  const c = [...document.querySelectorAll('button[data-p2-posto]')].filter((b) => b.getAttribute('data-p2-posto') === tipo && b.getClientRects().length);
+  const c = [...document.querySelectorAll('[data-pc-posto]')].filter((b) => b.getAttribute('data-pc-posto') === tipo && b.getClientRects().length);
   return c[0] || null;
 }
 function kv(pai, k, v) {
@@ -1378,14 +497,14 @@ function postoAtual(tipo) { return montarPostos(app.estado.agentes).find((p) => 
 function pintarPosto(tipo) {
   const p = postoAtual(tipo); if (!p) return;
   const R = resumir(p, app.estado);
-  $('#p2-dlg-tt').textContent = p.nome;
-  $('#p2-dlg-sub').textContent = `${ESTADO_TXT[R.estado] || R.estado} · ${R.contagem}`;
-  const body = $('#p2-dlg-body');
-  const foco = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-p2-exec');
+  $('#pc-dlg-tt').textContent = p.nome;
+  $('#pc-dlg-sub').textContent = `${ESTADO_TXT[R.estado] || R.estado} · ${R.contagem}`;
+  const body = $('#pc-dlg-body');
+  const foco = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-pc-exec');
   const rolagem = dlg.scrollTop;
   body.replaceChildren();
   const s1 = secao(body, 'Resumo');
-  const l = he('dl', 'p2-kv', null, s1);
+  const l = he('dl', 'pc-kv', null, s1);
   kv(l, 'Estado', ESTADO_TXT[R.estado] || R.estado);
   kv(l, 'Modelo', R.modelo || 'não informado');
   kv(l, 'Atividade', R.atividade);
@@ -1393,33 +512,33 @@ function pintarPosto(tipo) {
   kv(l, 'Execuções na sessão', R.tot);
   kv(l, 'Tarefas ativas', R.tarefas.length ? R.tarefas.join(', ') : 'nenhuma');
   const st = secao(body, 'Tokens do agente');
-  const lt = he('dl', 'p2-kv', null, st);
+  const lt = he('dl', 'pc-kv', null, st);
   kv(lt, 'Entrada', fmt(R.tok.entrada));
   kv(lt, 'Saída', fmt(R.tok.saida));
   kv(lt, 'Cache', fmt(R.tok.cache));
   const se1 = secao(body, `Execuções (${R.tot})`);
-  if (!p.execs.length) { he('p', 'p2-note', 'Este posto não teve execução nesta sessão.', se1); return; }
-  const ul = he('ul', 'p2-execs', null, se1);
+  if (!p.execs.length) { he('p', 'pc-note', 'Este posto não teve execução nesta sessão.', se1); return; }
+  const ul = he('ul', 'pc-execs', null, se1);
   for (const a of p.execs.slice().sort((x, y) => ultimo(y).localeCompare(ultimo(x)))) {
     const li = he('li', null, null, ul);
-    const b = he('button', 'p2-exec', null, li);
-    b.type = 'button'; b.setAttribute('data-p2-exec', a.id); b.setAttribute('data-estado', a.estado);
-    he('span', 'p2-exec__d', a.descricao || 'execução', b);
+    const b = he('button', 'pc-exec', null, li);
+    b.type = 'button'; b.setAttribute('data-pc-exec', a.id); b.setAttribute('data-estado', a.estado);
+    he('span', 'pc-exec__d', a.descricao || 'execução', b);
     const tk = a.tokens || {};
-    he('span', 'p2-exec__m', `${a.tarefa ? 'tarefa ' + a.tarefa + ' · ' : ''}${ESTADO_TXT[a.estado] || a.estado} · entrada ${fmt(tk.entrada)} · saída ${fmt(tk.saida)} · cache ${fmt(tk.cache)}`, b);
+    he('span', 'pc-exec__m', `${a.tarefa ? 'tarefa ' + a.tarefa + ' · ' : ''}${ESTADO_TXT[a.estado] || a.estado} · entrada ${fmt(tk.entrada)} · saída ${fmt(tk.saida)} · cache ${fmt(tk.cache)}`, b);
     b.setAttribute('aria-label', `Abrir execução: ${a.descricao || ''}, ${ESTADO_TXT[a.estado] || a.estado}`);
   }
-  if (foco) { const b = body.querySelector(`[data-p2-exec="${CSS.escape(foco)}"]`); if (b) b.focus(); }
+  if (foco) { const b = body.querySelector(`[data-pc-exec="${CSS.escape(foco)}"]`); if (b) b.focus(); }
   dlg.scrollTop = rolagem;
 }
 function pintarExecucao(a, d, erro) {
-  const body = $('#p2-dlg-body'); const rolagem = dlg.scrollTop;
+  const body = $('#pc-dlg-body'); const rolagem = dlg.scrollTop;
   body.replaceChildren();
-  const voltar = he('button', 'p2-btn', '← Voltar à lista', body);
-  voltar.type = 'button'; voltar.id = 'p2-voltar'; voltar.style.justifySelf = 'start';
-  $('#p2-dlg-sub').textContent = `${a.descricao || 'execução'} · ${ESTADO_TXT[a.estado] || a.estado}`;
+  const voltar = he('button', 'pc-btn', '← Voltar à lista', body);
+  voltar.type = 'button'; voltar.id = 'pc-voltar'; voltar.style.justifySelf = 'start';
+  $('#pc-dlg-sub').textContent = `${a.descricao || 'execução'} · ${ESTADO_TXT[a.estado] || a.estado}`;
   const s1 = secao(body, 'Resumo');
-  const l = he('dl', 'p2-kv', null, s1);
+  const l = he('dl', 'pc-kv', null, s1);
   kv(l, 'Estado', ESTADO_TXT[a.estado] || a.estado);
   kv(l, 'Atividade', a.atividade);
   kv(l, 'Modelo', a.modelo || 'não informado');
@@ -1429,66 +548,65 @@ function pintarExecucao(a, d, erro) {
   kv(l, 'Início', dataHora(a.inicio));
   kv(l, 'Fim', dataHora(a.fim));
   const st = secao(body, 'Tokens da execução');
-  const lt = he('dl', 'p2-kv', null, st);
+  const lt = he('dl', 'pc-kv', null, st);
   kv(lt, 'Entrada', fmt(a.tokens.entrada));
   kv(lt, 'Saída', fmt(a.tokens.saida));
   kv(lt, 'Cache', fmt(a.tokens.cache));
-  if (erro) { he('p', 'p2-note', 'Detalhe indisponível agora: ' + erro, secao(body, 'Detalhe')); return; }
-  if (!d) { he('p', 'p2-note', 'Carregando o detalhe da execução…', secao(body, 'Detalhe')); return; }
+  if (erro) { he('p', 'pc-note', 'Detalhe indisponível agora: ' + erro, secao(body, 'Detalhe')); return; }
+  if (!d) { he('p', 'pc-note', 'Carregando o detalhe da execução…', secao(body, 'Detalhe')); return; }
   const s2 = secao(body, 'Prompt recebido');
-  if (d.prompt) he('pre', 'p2-pre', d.prompt, s2);
-  else he('p', 'p2-note', a.tipo === 'am' ? 'A orquestradora não recebe prompt: ela abre a sessão.' : 'Prompt não registrado.', s2);
+  if (d.prompt) he('pre', 'pc-pre', d.prompt, s2);
+  else he('p', 'pc-note', a.tipo === 'am' ? 'A orquestradora não recebe prompt: ela abre a sessão.' : 'Prompt não registrado.', s2);
   const passos = Array.isArray(d.passos) ? d.passos : [];
   const usadas = new Map();
   for (const p of passos) if (p.tipo === 'ferramenta' && p.ferramenta) usadas.set(p.ferramenta, (usadas.get(p.ferramenta) || 0) + 1);
   const s3 = secao(body, 'Ferramentas');
-  if (usadas.size) { const ul = he('ul', 'p2-tools', null, s3); for (const [k, n] of usadas) he('li', null, `${k} ×${n}`, ul); }
-  else he('p', 'p2-note', 'Nenhuma chamada de ferramenta nos passos registrados.', s3);
+  if (usadas.size) { const ul = he('ul', 'pc-tools', null, s3); for (const [k, n] of usadas) he('li', null, `${k} ×${n}`, ul); }
+  else he('p', 'pc-note', 'Nenhuma chamada de ferramenta nos passos registrados.', s3);
   const errs = passos.filter((p) => p.erro);
   const s4 = secao(body, `Erros (${errs.length})`);
-  if (errs.length) { const ul = he('ul', 'p2-steps', null, s4); for (const p of errs) ul.appendChild(passoEl(p)); }
-  else he('p', 'p2-note', 'Sem erros nos passos registrados.', s4);
+  if (errs.length) { const ul = he('ul', 'pc-steps', null, s4); for (const p of errs) ul.appendChild(passoEl(p)); }
+  else he('p', 'pc-note', 'Sem erros nos passos registrados.', s4);
   const s5 = secao(body, `Passos (${passos.length})`);
-  if (passos.length) { const ul = he('ul', 'p2-steps', null, s5); for (const p of passos) ul.appendChild(passoEl(p)); }
-  else he('p', 'p2-note', 'Nenhum passo registrado.', s5);
+  if (passos.length) { const ul = he('ul', 'pc-steps', null, s5); for (const p of passos) ul.appendChild(passoEl(p)); }
+  else he('p', 'pc-note', 'Nenhum passo registrado.', s5);
   const s6 = secao(body, 'Retorno final');
-  if (d.retorno) he('pre', 'p2-pre', d.retorno, s6); else he('p', 'p2-note', 'Ainda sem retorno final.', s6);
+  if (d.retorno) he('pre', 'pc-pre', d.retorno, s6); else he('p', 'pc-note', 'Ainda sem retorno final.', s6);
   dlg.scrollTop = rolagem;
 }
 function passoEl(p) {
-  const li = he('li', 'p2-step');
+  const li = he('li', 'pc-step');
   li.setAttribute('data-erro', p.erro ? 'true' : 'false');
   he('time', null, hora(p.ts), li);
-  he('span', 'p2-step__k', p.tipo + (p.ferramenta ? ' · ' + p.ferramenta : ''), li);
-  if (p.erro) he('span', 'p2-step__e', 'ERRO', li);
-  he('span', 'p2-step__r', p.resumo || '', li);
+  he('span', 'pc-step__k', p.tipo + (p.ferramenta ? ' · ' + p.ferramenta : ''), li);
+  if (p.erro) he('span', 'pc-step__e', 'ERRO', li);
+  he('span', 'pc-step__r', p.resumo || '', li);
   return li;
 }
 function abrirPosto(tipo) {
   app.aberto = { tipo, exec: null };
   pintarPosto(tipo);
   if (!dlg.open) dlg.showModal();
-  $('#p2-dlg-x').focus();
+  $('#pc-dlg-x').focus();
 }
 async function abrirExecucao(id) {
   const a = app.execPorId.get(id); if (!a || !app.aberto) return;
   app.aberto.exec = id;
   pintarExecucao(a, null, null);
   dlg.scrollTop = 0;
-  const voltar = $('#p2-voltar'); if (voltar) voltar.focus();
+  const voltar = $('#pc-voltar'); if (voltar) voltar.focus();
   try {
     const d = await kit.detalhe(id);
-    if (app.aberto && app.aberto.exec === id) { pintarExecucao(app.execPorId.get(id) || a, d, null); const v = $('#p2-voltar'); if (v && !dlg.contains(document.activeElement)) v.focus(); }
+    if (app.aberto && app.aberto.exec === id) { pintarExecucao(app.execPorId.get(id) || a, d, null); const v = $('#pc-voltar'); if (v && !dlg.contains(document.activeElement)) v.focus(); }
   } catch (e) { if (app.aberto && app.aberto.exec === id) pintarExecucao(a, null, e && e.message ? e.message : 'erro'); }
 }
 function voltarLista() {
   if (!app.aberto) return;
   const id = app.aberto.exec; app.aberto.exec = null;
   pintarPosto(app.aberto.tipo);
-  const b = id && $(`[data-p2-exec="${CSS.escape(id)}"]`);
-  (b || $('#p2-dlg-x')).focus();
+  const b = id && $(`[data-pc-exec="${CSS.escape(id)}"]`);
+  (b || $('#pc-dlg-x')).focus();
 }
-let opener = null;
 dlg.addEventListener('close', () => {
   const tipo = app.aberto && app.aberto.tipo; app.aberto = null;
   const alvo = opener && opener.isConnected && opener.getClientRects().length ? opener : focoDe(tipo);
@@ -1496,32 +614,149 @@ dlg.addEventListener('close', () => {
   if (alvo) alvo.focus();
 });
 dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-$('#p2-dlg-x').addEventListener('click', () => dlg.close());
+$('#pc-dlg-x').addEventListener('click', () => dlg.close());
+
+
+/* ============================================================ estado do app */
+const app = {
+  estado: null, exemplo: false, execPosto: new Map(), porOriginal: new Map(), execPorId: new Map(),
+  vistas: new Set(), anteriorN: -1, aberto: null, filtro: '', sigCena: '', rotas: {}, selecionado: null,
+};
+
+/* ============================================================ geometria isométrica (projeção 2:1) */
+const TW = 80, TH = 40;
+const Pg = (x, y, z = 0) => [(x - y) * TW / 2, (x + y) * TH / 2 - z];
+const pts = (a) => a.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+const poly = (a, c) => `<polygon class="${c}" points="${pts(a)}"/>`;
+const escH = (s) => String(s ?? '—').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/* Caixa centrada em (cx,cy) da grade. Faces: l = y+d, r = x+w, t = topo. */
+function caixa(cx, cy, w, d, h, cls = '', z = 0) {
+  const x = cx - w / 2, y = cy - d / 2;
+  return `<g class="bx ${cls}">`
+    + poly([Pg(x, y + d, z + h), Pg(x + w, y + d, z + h), Pg(x + w, y + d, z), Pg(x, y + d, z)], 'l')
+    + poly([Pg(x + w, y, z + h), Pg(x + w, y + d, z + h), Pg(x + w, y + d, z), Pg(x + w, y, z)], 'r')
+    + poly([Pg(x, y, z + h), Pg(x + w, y, z + h), Pg(x + w, y + d, z + h), Pg(x, y + d, z + h)], 't')
+    + '</g>';
+}
+const texto = (x, y, linhas, ancora) => linhas.map((l, i) => `<text class="${i ? 'sub' : 'lab'}" x="${x}" y="${y + 14 * i}" text-anchor="${ancora}">${escH(l)}</text>`).join('');
+const pilula = (x, y, label) => { const w = 14 + String(label).length * 7; return `<rect class="pill" x="${x - w / 2}" y="${y - 9}" width="${w}" height="18" rx="9"/><text class="num" x="${x}" y="${y + 3.5}" text-anchor="middle">${escH(label)}</text>`; };
+
+const HUB = [1, 4];
+
+function desenharCena(postos) {
+  const est = app.estado;
+  const resumos = new Map(postos.map((p) => [p.tipo, resumir(p, est)]));
+  const ferr = (p) => p.execs.reduce((s, a) => s + (a.ferramentas || 0), 0);
+  const sig = JSON.stringify([app.selecionado, postos.map((p) => { const R = resumos.get(p.tipo); return [p.tipo, R.estado, R.contagem, R.tarefas, ferr(p)]; })]);
+  if (sig === app.sigCena) return;
+  app.sigCena = sig;
+  const foco = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-pc-posto');
+
+  const am = postos.find((p) => p.tipo === 'am');
+  const lista = postos.filter((p) => p.tipo !== 'am').map((p, i) => ({ p, R: resumos.get(p.tipo), x: 4 + 2.8 * i, up: i % 2 === 0, y: 4 + (i % 2 === 0 ? -2.6 : 2.6) }));
+  const xf = lista.length ? lista[lista.length - 1].x : 4;
+  const ponto = (g) => Pg(g[0], g[1]).map((v) => v.toFixed(1)).join(',');
+  app.rotas = {};
+  for (const e of lista) app.rotas[e.p.tipo] = [Pg(...HUB), Pg(e.x, 4), Pg(e.x, e.y)];
+
+  let s = `<path class="trk" d="M${ponto(HUB)} L${ponto([xf, 4])}"/>`;
+  for (const e of lista) s += `<path class="trk" d="M${ponto([e.x, 4])} L${ponto([e.x, e.y])}"/>`;
+  for (const e of lista) if (e.R.estado === 'trabalhando') s += `<path class="cx" d="M${ponto(HUB)} L${ponto([e.x, 4])} L${ponto([e.x, e.y])}"/>`;
+
+  const objs = [];
+  const obj = (p, R, inner) => `<g class="pc-o a-${R.estado}${app.selecionado === p.tipo ? ' sel' : ''}" data-obj="${p.tipo}" data-pc-posto="${p.tipo}" tabindex="0" role="button" aria-label="${escH(p.nome)}, ${ESTADO_TXT[R.estado] || R.estado}, ${escH(R.contagem)}">${inner}</g>`;
+  if (am) {
+    const R = resumos.get('am'), [hx, hy] = Pg(...HUB);
+    objs.push({ k: HUB[0] + HUB[1], s: obj(am, R, caixa(HUB[0], HUB[1], 2, 2, 16, 'pl') + caixa(HUB[0], HUB[1], 1.2, 1.2, 8, '', 16) + texto(hx, hy + 62, [am.nome, ESTADO_TXT[R.estado] || R.estado, R.contagem], 'middle')) });
+  }
+  for (const e of lista) {
+    const [sx, sy] = Pg(e.x, e.y), h = 8 + Math.min(ferr(e.p) * 3, 30);
+    const linhas = [e.p.nome, ESTADO_TXT[e.R.estado] || e.R.estado, e.R.contagem];
+    const rot = e.up ? texto(sx + 62, sy - 6, linhas, 'start') : texto(sx - 62, sy - 6, linhas, 'end');
+    const tag = e.R.tarefas.length ? pilula(sx, sy - h - 30, e.R.tarefas[0] + (e.R.tarefas.length > 1 ? ` +${e.R.tarefas.length - 1}` : '')) : '';
+    objs.push({ k: e.x + e.y, s: obj(e.p, e.R, caixa(e.x, e.y, 1.2, 1.2, 10, 'pl') + caixa(e.x, e.y, .7, .7, h - 4, '', 10) + rot + tag) });
+  }
+  s += objs.sort((a, b) => a.k - b.k).map((o) => o.s).join('');
+  const fixa = $('#pc-fixa');
+  fixa.innerHTML = s;
+  const b = fixa.getBBox();
+  if (b.width > 0) $('#pc-scene').setAttribute('viewBox', `${(b.x - 24).toFixed(0)} ${(b.y - 24).toFixed(0)} ${(b.width + 48).toFixed(0)} ${(b.height + 48).toFixed(0)}`);
+  if (foco) { const n = fixa.querySelector(`[data-pc-posto="${CSS.escape(foco)}"]`); if (n) n.focus(); }
+}
+
+/* Ponto que percorre a rota da fala. Só nasce para fala ainda não vista; sem animação com reduced-motion. */
+function rotaDaFala(f) {
+  const de = postoDeRef(f.de), para = postoDeRef(f.para), r = app.rotas;
+  let p = null;
+  if (de === 'am' && r[para]) p = r[para];
+  else if (para === 'am' && r[de]) p = r[de].slice().reverse();
+  else if (r[de] && r[para]) p = r[de].slice().reverse().concat(r[para].slice(1));
+  return p ? 'M' + p.map((q) => q.map((v) => v.toFixed(1)).join(',')).join(' L') : null;
+}
+function soltar(f) {
+  if (reduzMovimento()) return;
+  const d = rotaDaFala(f); if (!d) return;
+  const c = se('circle', { class: 'pkt', r: 4 }, $('#pc-pacotes'));
+  const an = se('animateMotion', { dur: '2.4s', path: d, begin: 'indefinite', fill: 'freeze' }, c);
+  an.beginElement();
+  setTimeout(() => c.remove(), 2600);
+}
+
+/* ============================================================ verificador de sobreposição (?checar) */
+function formas(g) {
+  const out = [];
+  g.querySelectorAll('polygon,text,rect').forEach((e) => {
+    if (e.tagName === 'polygon') out.push(e.getAttribute('points').trim().split(/\s+/).map((p) => p.split(',').map(Number)));
+    else { const b = e.getBBox(); out.push([[b.x, b.y], [b.x + b.width, b.y], [b.x + b.width, b.y + b.height], [b.x, b.y + b.height]]); }
+  });
+  return out;
+}
+const projecao = (p, ax) => { let mn = 1e9, mx = -1e9; for (const [x, y] of p) { const v = x * ax[0] + y * ax[1]; if (v < mn) mn = v; if (v > mx) mx = v; } return [mn, mx]; };
+function sat(a, b) {
+  for (const P_ of [a, b]) for (let i = 0; i < P_.length; i++) {
+    const [x1, y1] = P_[i], [x2, y2] = P_[(i + 1) % P_.length];
+    const l = Math.hypot(y1 - y2, x2 - x1) || 1, ax = [(y1 - y2) / l, (x2 - x1) / l];
+    const [a1, a2] = projecao(a, ax), [b1, b2] = projecao(b, ax);
+    if (a2 <= b1 + 1 || b2 <= a1 + 1) return false;
+  }
+  return true;
+}
+function checar() {
+  const falhas = [], vb = $('#pc-scene').viewBox.baseVal;
+  const os = [...$('#pc-fixa').querySelectorAll('[data-obj]')].map((g) => ({ id: g.getAttribute('data-obj'), f: formas(g) }));
+  for (const o of os) for (const f of o.f) for (const [x, y] of f) if (x < vb.x - 1 || y < vb.y - 1 || x > vb.x + vb.width + 1 || y > vb.y + vb.height + 1) { falhas.push(`${o.id} fora do viewBox`); break; }
+  for (let i = 0; i < os.length; i++) for (let j = i + 1; j < os.length; j++) if (os[i].f.some((a) => os[j].f.some((b) => sat(a, b)))) falhas.push(`${os[i].id} x ${os[j].id}`);
+  return [...new Set(falhas)];
+}
 
 /* ============================================================ eventos */
 document.addEventListener('click', (e) => {
-  const ex = e.target.closest('[data-p2-exec]');
-  if (ex) { abrirExecucao(ex.getAttribute('data-p2-exec')); return; }
-  if (e.target.closest('#p2-voltar')) { voltarLista(); return; }
-  const txt = e.target.closest('.p2-log__txt');
+  const ex = e.target.closest('[data-pc-exec]');
+  if (ex) { abrirExecucao(ex.getAttribute('data-pc-exec')); return; }
+  if (e.target.closest('#pc-voltar')) { voltarLista(); return; }
+  const txt = e.target.closest('.pc-log__txt');
   if (txt) { txt.setAttribute('aria-expanded', String(txt.getAttribute('aria-expanded') !== 'true')); return; }
   const rev = e.target.closest('[data-rever]');
-  if (rev) {
-    const f = app.estado && app.estado.falas.find((x) => x.id === rev.getAttribute('data-rever'));
-    if (f) { app.fila.unshift(f); esvaziarFila(); }
-    return;
-  }
-  const alvo = e.target.closest('button[data-p2-posto], [data-p2-posto]');
+  if (rev) { const f = app.estado && app.estado.falas.find((x) => x.id === rev.getAttribute('data-rever')); if (f) soltar(f); return; }
+  const alvo = e.target.closest('[data-pc-posto]');
   if (!alvo || dlg.contains(alvo)) return;
-  opener = alvo.matches('button') ? alvo : null;
-  abrirPosto(alvo.getAttribute('data-p2-posto'));
+  opener = alvo;
+  app.selecionado = alvo.getAttribute('data-pc-posto');
+  abrirPosto(app.selecionado);
 });
-$('#p2-filtro').addEventListener('change', (e) => { app.filtro = e.target.value; filtrarLog(); });
-const botaoTema = $('#p2-tema');
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target.closest && e.target.closest('g[data-pc-posto]');
+  if (t) { e.preventDefault(); t.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+});
+$('#pc-filtro').addEventListener('change', (e) => { app.filtro = e.target.value; filtrarLog(); });
+const botaoTema = $('#pc-tema');
 const NOME_TEMA = { sistema: 'Sistema', claro: 'Claro', escuro: 'Escuro' };
 function rotuloTema() { botaoTema.textContent = 'Tema: ' + NOME_TEMA[kit.temaAtual ? kit.temaAtual() : 'sistema']; }
 botaoTema.addEventListener('click', () => { kit.tema(); rotuloTema(); });
 rotuloTema();
+$('#pc-legenda').innerHTML = Object.entries(ESTADO_TXT).map(([k, v]) => `<span class="a-${k}"><i></i>${v}</span>`).join('');
+
 /* ============================================================ fluxo de dados */
 function aoEstado(est, info) {
   app.exemplo = !!(info && info.exemplo);
@@ -1531,29 +766,21 @@ function aoEstado(est, info) {
   app.porOriginal = new Map(est.agentes.map((a) => [a.tipoOriginal || a.tipo, tipoDe(a)]));
   const postos = montarPostos(est.agentes);
   atualizarTotais(est, postos);
-  atualizarCena();
+  desenharCena(postos);
   atualizarQuadro(est);
   atualizarFiltro(postos);
   const primeira = app.anteriorN < 0;
   const { novas, encolheu } = atualizarLog(est);
-  if (primeira) { novas.forEach((f) => app.vistas.add(f.id)); }
-  else {
-    const reanimar = encolheu ? est.falas : novas;
-    for (const f of reanimar) { if (!app.vistas.has(f.id)) { app.vistas.add(f.id); app.fila.push(f); } }
-    esvaziarFila();
-  }
+  if (primeira) novas.forEach((f) => app.vistas.add(f.id));
+  else for (const f of (encolheu ? est.falas : novas)) if (!app.vistas.has(f.id)) { app.vistas.add(f.id); soltar(f); }
   app.anteriorN = est.falas.length;
   if (app.aberto && dlg.open && !app.aberto.exec) pintarPosto(app.aberto.tipo);
+  if (new URLSearchParams(location.search).has('checar') && !$('#resultado-checar')) {
+    const pre = he('pre', null, JSON.stringify({ falhas: checar() }), document.body);
+    pre.id = 'resultado-checar';
+  }
 }
 kit.conectar(aoEstado);
-
-let rafRe = 0, ultimaDim = '';
-new ResizeObserver(() => {
-  const dim = cenaWrap.clientWidth + 'x' + cenaWrap.clientHeight;
-  if (dim === ultimaDim) return; ultimaDim = dim;
-  cancelAnimationFrame(rafRe);
-  rafRe = requestAnimationFrame(() => { if (app.estado) atualizarCena(); });
-}).observe(cenaWrap);
 </script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+[
+ {"id":"p1","nome":"Ladrilhos","layout":"lado","desc":"Mínimo: um ladrilho baixo por agente, orquestradora no topo, fileira de tarefas embaixo. Tudo plano, sem altura que cubra vizinho."},
+ {"id":"p2","nome":"Torres de tokens","layout":"lado","desc":"Altura da torre = tokens consumidos (escala log), segmentada em cache, entrada e saída. Foco em custo."},
+ {"id":"p3","nome":"Esteira","layout":"baixo","desc":"Pipeline fila → andamento → validação → devolvida → aprovada em plataformas separadas, com cubos de tarefa. Agentes em fileira abaixo."},
+ {"id":"p4","nome":"Mesas","layout":"lado","desc":"Versão limpa do escritório: uma mesa por agente com monitor que acende no estado. Sem cadeiras nem papelada."},
+ {"id":"p5","nome":"Andares","layout":"baixo","desc":"Vista explodida em 3 andares (orquestração, execução, verificação). Numeração nos objetos e legenda ao lado, sem rótulo sobre rótulo."},
+ {"id":"p6","nome":"Órbita","layout":"lado","desc":"Orquestradora no centro, agentes em anel elíptico. Pacotes percorrem as ligações das últimas mensagens."},
+ {"id":"p7","nome":"Racks","layout":"lado","desc":"Cada agente é um rack: LEDs na face direita medem tokens de saída; etiqueta no topo mostra a tarefa."},
+ {"id":"p8","nome":"Raias","layout":"baixo","desc":"Uma raia por agente; cada mensagem é um cubo na raia de quem falou, ligado à raia de quem recebeu. Leitura de comunicação."},
+ {"id":"p9","nome":"Ilhas","layout":"lado","desc":"Ilhas flutuantes em contorno (wireframe), com sombra no chão. Bloco sobre a ilha cresce com o número de ferramentas."},
+ {"id":"p10","nome":"Circuito","layout":"lado","desc":"Mapa de metrô isométrico: tronco da orquestradora com ramais ortogonais até cada estação de agente."}
+]

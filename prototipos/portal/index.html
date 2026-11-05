@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Galeria · protótipos do portal</title>
+<style>
+:root{--bg:#f3f5f8;--fg:#12161c;--muted:#5a6575;--line:#dde2e9;--surface:#fff;--accent:#2f6df6;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#0c0f14;--fg:#e8ecf2;--muted:#8b96a6;--line:#252c37;--surface:#141920;--accent:#6ea0ff}}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 ui-sans-serif,system-ui,"Segoe UI",sans-serif}
+header{padding:20px 24px 4px}h1{margin:0;font-size:20px}header p{margin:4px 0 0;color:var(--muted)}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:18px;padding:18px 24px 32px}
+.c{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.h{display:flex;justify-content:space-between}.h a{color:var(--accent)}
+.c p{margin:0;color:var(--muted);font-size:13px;min-height:38px}
+iframe{width:100%;aspect-ratio:16/10;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+</style></head><body>
+<header><h1>Portal · 10 protótipos isométricos</h1><p>Mesmos dados (exemplo.json), mesmo contrato. Cada um funciona em tema claro e escuro (botão “Tema” ou preferência do sistema). Clique em um agente na cena para ver o detalhe.</p></header>
+<div class="g">
+  <article class="c">
+    <div class="h"><b>P1 · Ladrilhos</b><a href="p1/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Mínimo: um ladrilho baixo por agente, orquestradora no topo, fileira de tarefas embaixo. Tudo plano, sem altura que cubra vizinho.</p>
+    <iframe src="p1/index.html?auto=0&q=3" title="Ladrilhos" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P2 · Torres de tokens</b><a href="p2/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Altura da torre = tokens consumidos (escala log), segmentada em cache, entrada e saída. Foco em custo.</p>
+    <iframe src="p2/index.html?auto=0&q=3" title="Torres de tokens" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P3 · Esteira</b><a href="p3/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Pipeline fila → andamento → validação → devolvida → aprovada em plataformas separadas, com cubos de tarefa. Agentes em fileira abaixo.</p>
+    <iframe src="p3/index.html?auto=0&q=3" title="Esteira" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P4 · Mesas</b><a href="p4/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Versão limpa do escritório: uma mesa por agente com monitor que acende no estado. Sem cadeiras nem papelada.</p>
+    <iframe src="p4/index.html?auto=0&q=3" title="Mesas" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P5 · Andares</b><a href="p5/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Vista explodida em 3 andares (orquestração, execução, verificação). Numeração nos objetos e legenda ao lado, sem rótulo sobre rótulo.</p>
+    <iframe src="p5/index.html?auto=0&q=3" title="Andares" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P6 · Órbita</b><a href="p6/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Orquestradora no centro, agentes em anel elíptico. Pacotes percorrem as ligações das últimas mensagens.</p>
+    <iframe src="p6/index.html?auto=0&q=3" title="Órbita" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P7 · Racks</b><a href="p7/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Cada agente é um rack: LEDs na face direita medem tokens de saída; etiqueta no topo mostra a tarefa.</p>
+    <iframe src="p7/index.html?auto=0&q=3" title="Racks" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P8 · Raias</b><a href="p8/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Uma raia por agente; cada mensagem é um cubo na raia de quem falou, ligado à raia de quem recebeu. Leitura de comunicação.</p>
+    <iframe src="p8/index.html?auto=0&q=3" title="Raias" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P9 · Ilhas</b><a href="p9/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Ilhas flutuantes em contorno (wireframe), com sombra no chão. Bloco sobre a ilha cresce com o número de ferramentas.</p>
+    <iframe src="p9/index.html?auto=0&q=3" title="Ilhas" loading="lazy"></iframe>
+  </article>
+  <article class="c">
+    <div class="h"><b>P10 · Circuito</b><a href="p10/index.html" target="_blank" rel="noopener">abrir</a></div>
+    <p>Mapa de metrô isométrico: tronco da orquestradora com ramais ortogonais até cada estação de agente.</p>
+    <iframe src="p10/index.html?auto=0&q=3" title="Circuito" loading="lazy"></iframe>
+  </article></div></body></html>
