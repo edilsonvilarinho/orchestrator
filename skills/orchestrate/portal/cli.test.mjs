@@ -189,3 +189,18 @@ test('emit.mjs conta reprovações pelo log: 10 no haiku pedem escalada, 3 no so
     assert.equal(ag1.devolucoes, 13, 'o portal precisa contar o mesmo que o emit');
   } finally { amb.limpar(); }
 });
+
+test('emit.mjs funciona sem portal: --sessao basta e a contagem de reprovações vem do log', () => {
+  const amb = criarAmbiente();
+  try {
+    const esc = path.join(amb.raiz, '.claude', 'escritorio');
+    assert.equal(fs.existsSync(path.join(esc, 'portal.json')), false);
+    const base = ['--sessao', SESSAO];
+    assert.equal(rodar(amb, 'emit.mjs', ['tarefa', ...base, '--id', 'NP1', '--titulo', 'Sem portal', '--dono', 'backend-dev', '--estado', 'andamento']).status, 0);
+    const r = rodar(amb, 'emit.mjs', ['veredito', ...base, '--tarefa', 'NP1', '--resultado', 'devolvida', '--texto', 'falhou']);
+    assert.equal(r.status, 0);
+    assert.match(r.stdout, /reprovação 1\/10 no haiku\. Ação: devolver ao mesmo agente/);
+    assert.equal(fs.existsSync(path.join(esc, 'portal.json')), false);
+    assert.equal(rodar(amb, 'emit.mjs', ['fala', '--de', 'am', '--para', 'x', '--texto', 'y']).status, 1);
+  } finally { amb.limpar(); }
+});

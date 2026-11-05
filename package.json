@@ -2,6 +2,6 @@
   "name": "orchestrate",
   "private": true,
   "type": "commonjs",
-  "scripts": { "test": "node --test skills/orchestrate/portal/" },
+  "scripts": { "test": "node --test \"skills/orchestrate/**/*.test.mjs\"" },
   "engines": { "node": ">=24" }
 }

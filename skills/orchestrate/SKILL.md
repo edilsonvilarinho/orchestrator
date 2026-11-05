@@ -1,28 +1,60 @@
 ---
 name: orchestrate
-description: Runs a request through a cheap-first multi-agent workflow. The main session plans and validates, subagents on haiku execute, failures go back to the same agent, and only 10 rejections escalate to sonnet. Starts a live visual office portal showing agents, tasks and messages, and gates visual work behind prototypes. Use when the user asks to orchestrate, delegate to agents, or use the office portal.
-argument-hint: "[--prototypes N] <request>"
-allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/portal/start.mjs *), Bash(node ${CLAUDE_SKILL_DIR}/portal/emit.mjs *)
+description: Runs a request through a cheap-first multi-agent workflow. The main session plans and validates, subagents on haiku execute, failures go back to the same agent, and only 10 rejections escalate to sonnet. Starts a live visual office portal showing agents, tasks and messages (skippable with --no-portal), and gates visual work behind prototypes. Use when the user asks to orchestrate, delegate to agents, or use the office portal.
+argument-hint: "[--no-portal] [--design-system <path>] [--prototypes N] <request>"
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/portal/start.mjs *), Bash(node ${CLAUDE_SKILL_DIR}/portal/emit.mjs *), Bash(node ${CLAUDE_SKILL_DIR}/setup/agentes.mjs *)
 ---
 
 # Orchestrate
 
 Request: $ARGUMENTS
 
-Portal: !`node ${CLAUDE_SKILL_DIR}/portal/start.mjs --sessao ${CLAUDE_SESSION_ID} || true`
+Agents:
+!`node ${CLAUDE_SKILL_DIR}/setup/agentes.mjs verificar || true`
 
-The portal starts by itself on every invocation, before anything else. The first line of your reply is the URL
-above, so the user can follow progress from the start; the plan comes after. If the line shows an error, fix the
-portal before delegating: in this skill it is not optional.
+## Mode: with or without portal
+
+- **With portal (default).** Your first action, before anything else, is to run
+  `node ${CLAUDE_SKILL_DIR}/portal/start.mjs --sessao ${CLAUDE_SESSION_ID}`. The first line of your reply is the
+  URL it prints, so the user can follow progress from the start; the plan comes after. If it prints an error, fix
+  the portal before delegating: with the portal on, it is not optional.
+- **Without portal (`--no-portal` in the request).** Never run `start.mjs`: no server, no browser, no URL. The flow
+  is identical (sections 0 to 7, same rules, same limits). Everything that goes through `emit.mjs` still runs,
+  because it is the log that counts rejections and enforces the escalation limits. Only the visual layer is gone.
+
+Every `emit.mjs` call below carries `--sessao ${CLAUDE_SESSION_ID}`, which works in both modes.
 
 The portal lives in `portal/web/` and shows one desk per agent, a task board and a communication log on a single
 screen. It reads the session transcripts on its own; what only you know (tasks, messages, verdicts) goes in through
 `emit.mjs`. Subcommands and flags of `emit.mjs` are in Portuguese by design (see `references/portal-contract.md`).
 
-You are the orchestrator. In the portal you appear as agent `am`.
+You are the orchestrator. With the portal on, you appear in it as agent `am`.
+
+## 0. First run: configure the agents for this project
+
+If the `Agents:` block above says `PENDENTE`, the project has no agents configured yet. Do this after the portal URL
+line (right at the start, in `--no-portal` mode) and before planning; if it says `CONFIGURADO`, skip to section 1.
+
+1. Show the user the detected stack and commands from the block (they come from manifests only; commands marked
+   `convenção` are the ecosystem default, not verified in this project).
+2. Ask which option they want, with `AskUserQuestion`:
+   - **Install for this project (recommended)**: `node ${CLAUDE_SKILL_DIR}/setup/agentes.mjs instalar` writes the
+     five agents to `<project>/.claude/agents/` from the templates in `agents/`, each with a `Project context`
+     section (stack, commands, rule files). It never overwrites an existing agent.
+   - **Use the generic agents**: `node ${CLAUDE_SKILL_DIR}/setup/agentes.mjs dispensar` records the choice and stops
+     asking.
+3. After installing, read each generated agent and fix what the manifests could not tell: conventions, forbidden
+   paths, the real test command if the detected one is a `convenção`. Take the rules from the project's `CLAUDE.md`
+   or `AGENTS.md` if present; do not invent any.
+4. If the new agents are not available to delegate to, tell the user to restart the session (or reload with
+   `/agents`) and run the same request again.
 
 ## 1. Interpret the request
 
+- `--no-portal`: skip the portal (see Mode above). Strip it from the request before planning.
+- `--design-system <path>`: local file or folder with the project's design system (tokens, components, rules). Strip it
+  from the request. Used by section 6 and by any visual task. A value that is not a local path (a URL, a Figma
+  link) is not supported: tell the user and ask for a local path. If the path does not exist, stop and ask.
 - `--prototypes N`: number of prototypes per visual deliverable. Without the option, N = 4.
 - Work is **visual** when it involves a screen, front end, video, image or any artefact the user judges by looking
   at it. Visual work always goes through the prototype gate (section 6).
@@ -36,7 +68,7 @@ agent iterates alone until it passes, without spending an orchestrator turn. Rec
 the portal:
 
 ```bash
-node ${CLAUDE_SKILL_DIR}/portal/emit.mjs tarefa --id PE1 --titulo "Floor plan" --dono prototype-dev --estado fila
+node ${CLAUDE_SKILL_DIR}/portal/emit.mjs tarefa --sessao ${CLAUDE_SESSION_ID} --id PE1 --titulo "Floor plan" --dono prototype-dev --estado fila
 ```
 
 Shared specification goes in a briefing file, never in the prompt. N agents read the same file.
@@ -44,7 +76,7 @@ Shared specification goes in a briefing file, never in the prompt. N agents read
 ## 3. Route: haiku first
 
 Every subagent runs on haiku with high effort. Set that in the agent's frontmatter and delegate without `model` or
-`effort`. Ready-made agents are in `examples/agents/` of this repository.
+`effort`. Ready-made agent templates are in `agents/` of this skill; section 0 installs them per project.
 
 | Work | Agent |
 |---|---|
@@ -88,8 +120,8 @@ reason behind the request. Point to a path, do not paste text.
 - Speak in the portal at each handoff:
 
 ```bash
-node ${CLAUDE_SKILL_DIR}/portal/emit.mjs fala --de am --para prototype-dev --tarefa PE1 --texto "Floor plan is yours."
-node ${CLAUDE_SKILL_DIR}/portal/emit.mjs tarefa --id PE1 --estado andamento
+node ${CLAUDE_SKILL_DIR}/portal/emit.mjs fala --sessao ${CLAUDE_SESSION_ID} --de am --para prototype-dev --tarefa PE1 --texto "Floor plan is yours."
+node ${CLAUDE_SKILL_DIR}/portal/emit.mjs tarefa --sessao ${CLAUDE_SESSION_ID} --id PE1 --estado andamento
 ```
 
 ## 5. Validate and send back
@@ -98,7 +130,7 @@ No delivery is accepted on the agent's own report. Check every criterion with yo
 screenshot or a frame extracted from the video.
 
 ```bash
-node ${CLAUDE_SKILL_DIR}/portal/emit.mjs veredito --tarefa PE1 --resultado aprovada --texto "Criteria checked."
+node ${CLAUDE_SKILL_DIR}/portal/emit.mjs veredito --sessao ${CLAUDE_SESSION_ID} --tarefa PE1 --resultado aprovada --texto "Criteria checked."
 ```
 
 Rejected: `--resultado devolvida`. The command prints the count and the action; follow the printed action, never
@@ -116,7 +148,7 @@ it in the agent's place.
 - **`parar e reportar ao dono do produto`** (3rd rejection on sonnet): stop and report to the user what failed.
 
 ```bash
-node ${CLAUDE_SKILL_DIR}/portal/emit.mjs escalada --tarefa PE1
+node ${CLAUDE_SKILL_DIR}/portal/emit.mjs escalada --sessao ${CLAUDE_SESSION_ID} --tarefa PE1
 ```
 
 `emit.mjs escalada` refuses a task below the limit. Limits live in `LIMITE_REPROVACOES` in `portal/emit.mjs`.
@@ -124,14 +156,30 @@ node ${CLAUDE_SKILL_DIR}/portal/emit.mjs escalada --tarefa PE1
 ## 6. Prototype gate (visual work)
 
 1. Generate N prototypes in `prototipos/<deliverable>/`, one agent per prototype, with genuinely different directions.
-2. Publish the gallery in the portal (`/prototipos/<deliverable>/`) and validate each one in a real browser.
+2. Publish the gallery in the portal (`/prototipos/<deliverable>/`) and validate each one in a real browser. With
+   `--no-portal`, open the `prototipos/<deliverable>/index.html` files directly in the browser and give the user those
+   paths.
 3. Stop and ask the user to choose. No final version before the choice.
 
-If the project has a design system, read it before planning any visual; prototypes use its existing tokens. A new
-token, component or rule: list what is missing and ask permission first.
+### Design system
+
+The design system is the one at `--design-system <path>`; without the option, look for one in the project only if
+the work is visual, and use it if found. Never read it yourself: the `explorer` does it, to keep the whole system
+out of your context.
+
+1. Before planning any visual task, delegate to `explorer` with the standard prompt format. Task: locate, in
+   `<path>`, the tokens (colors, type, spacing), the components with their props and usage rules, and any written
+   guidelines. Return `file:line` pointers, at most 20 lines. `explorer` is read-only and cannot write files.
+2. Write the return to a briefing file (for example `prototipos/design-system.md`): pointers plus the few values
+   that decide the work. Shared specification goes in a briefing, never in the prompt.
+3. Every visual task points to that briefing and names the design-system files the agent must read. Prototypes use
+   the existing tokens and components only.
+4. A new token, component or rule: list what is missing and ask permission first.
+
+If the explorer finds nothing usable at `<path>`, stop and tell the user; do not invent a design system.
 
 ## 7. Wrap up
 
 One activity, one commit, in Conventional Commits. Update the status in the project's task plan if there is one.
-In the final report, state what was verified, what was not, the per-agent token cost shown in the portal, and how
+In the final report, state what was verified, what was not, the per-agent token cost shown in the portal (with `--no-portal`: say the cost was not measured), and how
 many rejections and escalations each task had.
